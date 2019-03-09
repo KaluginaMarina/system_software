@@ -1,27 +1,38 @@
 .TH WHOAM 1 "06 марта 2019" "GNU coreutils 8.28"
 .SH НАЗВАНИЕ
-.PP
+.PP 
 whoami - выводит username текущего пользователя.
 .SH CИНТАКСИС
-.PP whoami [OPTION] ...
+.PP 
+whoami [OPTION] file
 .SH ОПИСАНИЕ
-.PP Выводит имя пользователя, связанное с текущам действующим id пользователя. Эквивалентно команде "id -un"
-.TP 
-\-\-help
-вывести на экран страницу помощи и выйти.
+.PP 
+Выводит имя пользователя, связанное с текущам действующим id пользователя. Эквивалентно команде "id -un"
+.TP  
+\-\-help вывести на экран страницу помощи и выйти.
 .TP
-\-\-version
-вывести на экран информацию о версии и выйти.
+\-\-version вывести на экран информацию о версии и выйти.
 .SH ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ
-.PP Статус выхода "0" обозначает успешное завершение работы.
+.PP 
+Статус выхода "0" обозначает успешное завершение работы.
 Ненулевое значение указывает на неудачу.
+.SH ПРИМЕР ИСПОЛЬЗОВАНИЯ
+.PP
+[17:53] root@hemlock:~# whoami
+.PP 
+root
 .SH АВТОР
-.PP Richard Mlynarik
+.PP 
+Richard Mlynarik
 .SH СООБЩЕНИЯ ОБ ОШИБКАХ
-.PP Онлайн-справка по GNU coreutils: <http://www.gnu.org/software/coreutils/>
-.PP Сообщайте об ошибках whoami на <http://translationproject.org/team/>
+.PP 
+Онлайн-справка по GNU coreutils: <http://www.gnu.org/software/coreutils/>
+.PP 
+Сообщайте об ошибках whoami на <http://translationproject.org/team/>
 .SH АВТОРСКОЕ ПРАВО
-.PP  Copyright   ©   2017   Free   Software   Foundation,  Inc.   License  GPLv3+:  GNU  GPL  version  3  or  later <http://gnu.org/licenses/gpl.html>.
-.PP Это бесплатное программное обеспечение: вы можете свободно изменять и распространять его.
+.PP  
+Copyright   ©   2017   Free   Software   Foundation,  Inc.   License  GPLv3+:  GNU  GPL  version  3  or  later <http://gnu.org/licenses/gpl.html>.
+.TP Это бесплатное программное обеспечение: вы можете свободно изменять и распространять его.
 .SH СМОТРИТЕ ТАК ЖЕ
-.PP Документация: <http://www.gnu.org/software/coreutils/whoami>
+.PP 
+Документация: <http://www.gnu.org/software/coreutils/whoami>
