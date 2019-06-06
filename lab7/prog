@@ -28,7 +28,7 @@ do
 	then
 		echo "Введите путь к каталогу"
 		read path
-		cd "$path" 2>>"$err" || my_error
+		cd \"$path\" 2>>"$err" || my_error
 		continue
 	fi
 		
@@ -52,7 +52,7 @@ do
 		read file_cp
 		echo "Введите путь для копирования"
 		read path_cp
-		cp "$file_cp" "path_cp" 2>>"$err" || my_error 
+		cp "$file_cp" "$path_cp" 2>>"$err" || my_error 
 		continue
 	fi
 	if [ $com != 6 ]
