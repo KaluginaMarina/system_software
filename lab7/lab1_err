@@ -1,0 +1,9 @@
+./prog: line 31: cd: -l: invalid option
+cd: usage: cd [-L|[-P [-e]] [-@]] [dir]
+Fri Jun  7 00:51:33 STD 2019
+
+
+./prog: line 31: cd: qwe: No such file or directory
+Fri Jun  7 00:52:21 STD 2019
+
+

@@ -1,0 +1,62 @@
+#!/bin/bash
+err="lab1_err"
+com=0
+
+function my_error {
+	 date >> "$err" 2>>"/dev/null" || echo "Не удалось создать файл. Возможно, не хватает прав."
+	 echo "Произошла ошибка. Подробную информацию можно узнать в файле `pwd`/$err" 1>&2 
+	 echo -e '\n' >> "$err" 2>>"/dev/null" 
+}
+
+while [ $com != 6 ] 
+do
+	echo "Введите: 1 -- вывод текущей дериктории.
+         2 -- смена текущего каталога
+         3 -- вывод текущей даты и времени
+         4 -- вывод содержимого файла на экран
+         5 -- копирование файла
+         6 -- выход"
+	read com || exit
+
+	if [ $com == 1 ] 
+	then 
+		pwd
+		continue
+	fi
+
+	if [ $com == 2 ]
+	then
+		echo "Введите путь к каталогу"
+		read path
+		cd "$path" 2>>"$err" || my_error
+		continue
+	fi
+		
+	if [ $com == 3 ]
+	then
+		date "+%a %b%e %H:%I %Z %Y"
+		continue
+	fi
+
+	if [ $com == 4 ]
+	then
+		echo "Введите название файла/путь к файлу"
+		read file
+		cat "$file" 2>>"$err" || my_error 
+		continue	
+	fi
+
+	if [ $com == 5 ]
+	then
+		echo "Введите имя файла/путь к файлу"
+		read file_cp
+		echo "Введите путь для копирования"
+		read path_cp
+		cp "$file_cp" "path_cp" 2>>"$err" || my_error 
+		continue
+	fi
+	if [ $com != 6 ]
+	then
+		echo "Введена неверная команда" 1>&2
+	fi
+done
