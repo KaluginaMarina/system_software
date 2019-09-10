@@ -1,0 +1,8 @@
+./prog: line 31: cd: "qwe": No such file or directory
+Fri Jun  7 09:09:47 STD 2019
+
+
+./prog: line 31: cd: too many arguments
+Fri Jun  7 09:40:06 STD 2019
+
+
