@@ -3,4 +3,4 @@
 
 [Системное программное обеспечение](https://github.com/KaluginaMarina/system_software/tree/master/spo)
 
-[Основы системного программирования](https://github.com/KaluginaMarina/system_software/tree/master/spo)
+[Основы системного программирования](https://github.com/KaluginaMarina/system_software/tree/master/osp)
