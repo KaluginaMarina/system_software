@@ -2,5 +2,5 @@
 
 # в файле /etc/passwd каждая строка описывает одного пользователя:
 # login : password : UID : GID : GECOS : home : shell
-# при указании в регистрационной оболочке :/sbin/nologin пользователю запрещается заходить в систему.
-cat /etc/passwd | grep ":[/sbin/nologin|bin/false]$" | awk -F ":" '{print $1}' | sort
+# при указании в регистрационной оболочке /sbin/nologin или /bin/false пользователю запрещается заходить в систему.
+cat /etc/passwd | awk -F':' '/:(\/sbin\/nologin|\/bin\/false)$/{print $1}' | sort
