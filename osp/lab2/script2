@@ -1,0 +1,17 @@
+#!/bin/bash
+
+lines=()
+
+if [ -z $1 ] 
+then
+	echo "Отсутствует имя директории"
+	exit
+fi
+
+lines+=("$(ls -l "$1")")
+echo $lines
+
+#for c in $1/*
+#do
+	#lsof $curr_file | awk '$4~/[0-9]*w/'
+#done
