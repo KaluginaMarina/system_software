@@ -8,8 +8,13 @@ fi
 
 if [ -d $1 ]
 then
-        fuser `pwd`
+        for c in $1/*
+        do
+                if [ -p  $c ]
+                then
+                         fuser -f $c  2>&1 | awk -F":" '/:.{2,}$/{print $1}'
+                fi
+        done
 else
         echo "Дерриктория не обнаружена"
 fi
-
