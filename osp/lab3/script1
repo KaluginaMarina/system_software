@@ -20,32 +20,49 @@ then
         exit 1
 fi
 
-# own_id -- id владельца файла
-own_id=$(ls -n $1 | awk '{print $3}')
-# own_name -- имя владельца
-own_name=$(cat /etc/passwd | grep ".*:.*:$own_id" | awk -F":" '{print $1}')	
+# ---------OWNER-----------------------
 
-# есть ли у владельца права на запись
-res_own=$(ls -l $1 | awk -v own="$own_name" '/^-.w/{print own}')
+if [ -n $(ls -l $1 | awk '/^-.w/{print $1}') ]
+then
+	# own_id -- id владельца файла
+	own_id=$(ls -n $1 | awk '{print $3}')
+	# own_name -- имя владельца
+	own_name=$(grep ".*:.*:$own_id" /etc/passwd | awk -F":" '{print $1}')	
+fi
 
+# ---------GROUP-----------------------
 
-# group_id -- id группы
-group_id=$(ls -n $1 | awk '{print $4}')
-# group_memp -- пользователи, принадлежащие группе с id = group_id
-group_memb=$(getent group $group_id | awk -F":" '{print $1}')
+if [ -n $(ls -l $1 | awk '/^-....w/{print $1}') ]
+then
+	# group_id -- id группы
+	group_id=$(ls -n $1 | awk '{print $4}')
+	# group_memp -- пользователи, принадлежащие группе с id = group_id
+	group_memb=$(getent group $group_id | awk -F":" '{print $1}')
+fi
 
-# есть ли у группы права на запись
-res_group=$(ls -l $1 | awk -v group=$group_memb '/^-....w/{print group}')
+# ---------OTHER----------------------
+
+if [ -n $(ls -l $1 | awk '/^-.......w/{print $1}') ]
+then
+	other=$(awk -F":" '{print $1}' /etc/passwd)
+fi
+
+# --------RESULT----------------------
 
 # результат
-echo "Пользователи, имеющие права на запись в файл \"$1\":"
+echo -e "Пользователи, имеющие права на запись в файл \"$1\":\n"
 
-if [ -n "$res_own" ] 
+if [ -n "$own_name" ] 
 then 
-	echo "Владелец: $res_own"
+	echo -e "Владелец:\n$own_name\n"
 fi 
 
-if [ -n "$res_group" ]
+if [ -n "$group_memb" ]
 then
-	echo "пользователи группы: $res_group"
+	echo -e "Пользователи группы:\n$group_memb\n"
+fi
+
+if [ -n "$other" ]
+then
+	echo -e "Остальные пользователи:\n$other\n"
 fi
