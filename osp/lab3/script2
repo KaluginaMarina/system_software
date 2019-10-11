@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# проверка введенных параметров
+if [ -z $1 ]
+then
+        echo -e "\
+        Хаос царит в системе,\n\
+        Всё могло быть в порядке, но\n\
+        Отсутствует имя пользователя."
+        exit 1
+fi
+
+# проверка существования пользователя
+if ! [ -n "$(getent passwd $1)" ] 
+then
+				echo -e  "\
+        Пользователя, которого ты ищещь,\n\
+        Найти невозможно, но\n\
+        Ведь не счесть других."
+        exit 1
+fi
+
+# user_id -- id пользователя 
+user_id=$(getent passwd $1 | awk -F":" '{print $3}')
+
+# проверка каждого каталога
+for file in $(ls) 
+do
+	if [ ! -d "$file" ]
+	then
+		continue
+	fi
+	user_file_id=$(ls -nd "$file" | awk '{ print $3 }')
+	group_file_id=$(ls -nd "$file" | awk '{ print $4 }')
+	# имеет ли право на запись пользователь, как владелец?
+	if [ $user_id == $user_file_id ]
+	then
+		if [ -n $(ls -ld $file | awk -v user="$1" '/^d.w/{print user}') ]
+		then
+			echo $1
+		fi
+	fi
+done
