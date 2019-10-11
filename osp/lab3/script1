@@ -22,29 +22,29 @@ fi
 
 # ---------OWNER-----------------------
 
-if [ -n $(ls -l $1 | awk '/^-.w/{print $1}') ]
+if [ -n "$(ls -l $1 | awk '/^-.w/')" ]
 then
 	# own_id -- id владельца файла
 	own_id=$(ls -n $1 | awk '{print $3}')
 	# own_name -- имя владельца
-	own_name=$(grep ".*:.*:$own_id" /etc/passwd | awk -F":" '{print $1}')	
+	own_name=$(getent passwd | grep ".*:.*:$own_id" | awk -F":" '{print $1}')	
 fi
 
 # ---------GROUP-----------------------
 
-if [ -n $(ls -l $1 | awk '/^-....w/{print $1}') ]
+if [ -n "$(ls -l $1 | awk '/^-....w/')" ]
 then
 	# group_id -- id группы
 	group_id=$(ls -n $1 | awk '{print $4}')
 	# group_memp -- пользователи, принадлежащие группе с id = group_id
-	group_memb=$(getent group $group_id | awk -F":" '{print $1}')
+	group_memb=$(getent passwd | grep ".*:.*:.*:$group_id" | awk -F":" '{print $1}')
 fi
 
 # ---------OTHER----------------------
 
-if [ -n $(ls -l $1 | awk '/^-.......w/{print $1}') ]
+if [ -n "$(ls -l $1 | awk '/^-.......w/')" ]
 then
-	other=$(awk -F":" '{print $1}' /etc/passwd)
+	other=$(getent passwd | awk -F":" '{print $1}')
 fi
 
 # --------RESULT----------------------
