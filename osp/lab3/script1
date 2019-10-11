@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# проверка введенных параметров
 if [ -z $1 ]
 then
         echo -e "\
@@ -9,6 +10,7 @@ then
         exit 1
 fi
 
+# проверка существования файла
 if ! [ -n "$(ls -l $1 2>/dev/null | awk '/^-/')" ] 
 then        
 				echo -e  "\
@@ -18,5 +20,32 @@ then
         exit 1
 fi
 
-own=$(ls -n $1 | awk '{print $3}')
-echo $own
+# own_id -- id владельца файла
+own_id=$(ls -n $1 | awk '{print $3}')
+# own_name -- имя владельца
+own_name=$(cat /etc/passwd | grep ".*:.*:$own_id" | awk -F":" '{print $1}')	
+
+# есть ли у владельца права на запись
+res_own=$(ls -l $1 | awk -v own="$own_name" '/^-.w/{print own}')
+
+
+# group_id -- id группы
+group_id=$(ls -n $1 | awk '{print $4}')
+# group_memp -- пользователи, принадлежащие группе с id = group_id
+group_memb=$(getent group $group_id | awk -F":" '{print $1}')
+
+# есть ли у группы права на запись
+res_group=$(ls -l $1 | awk -v group=$group_memb '/^-....w/{print group}')
+
+# результат
+echo "Пользователи, имеющие права на запись в файл \"$1\":"
+
+if [ -n "$res_own" ] 
+then 
+	echo "Владелец: $res_own"
+fi 
+
+if [ -n "$res_group" ]
+then
+	echo "пользователи группы: $res_group"
+fi
