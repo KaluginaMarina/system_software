@@ -32,10 +32,21 @@ do
 	fi
 	user_file_id=$(ls -nd "$file" | awk '{ print $3 }')
 	group_file_id=$(ls -nd "$file" | awk '{ print $4 }')
+
+	# проверка sticky bit'а
+	if [ -n "$(ls -ld $file | awk '/^d........T/')" ]
+	then 
+		if [ $user_id == $user_file_id ]  
+		then
+			echo "$file (sticky bit)"
+			continue
+		fi
+	fi
+
 	# имеет ли право на запись пользователь, как владелец?
 	if [ $user_id == $user_file_id ]
 	then
-		if [ -n "$(ls -ld $file | awk '/^d..[xs]/')" ]
+		if [ -n "$(ls -ld $file | awk '/^d.w[xs]/')" ]
 		then
 			echo "$file (owner)"
 			continue
@@ -48,7 +59,7 @@ do
 		gr_id=$(getent group "$gr" | awk '{print $4}')
 		if [ $gr_id == $group_id ]
 		then
-			if [ -n "$(ls -ld $file | awk '/^d.....[xs]/')" ]
+			if [ -n "$(ls -ld $file | awk '/^d....w[xs]/')" ]
 			then
 				echo "$file (group)"
 				continue 2
@@ -57,7 +68,7 @@ do
 	done
 
 	# для остальных пользователей
-	if [ -n "$(ls -ld dir | awk '/^d........[tx]/')" ]
+	if [ -n "$(ls -ld "$file" | awk '/^d.......wx/')" ]
 	then
 		echo "$file (other)"
 	fi
