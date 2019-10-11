@@ -1,0 +1,172 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[a4paper, includeheadfoot, mag=1000, left=2cm, right=1.5cm, top=1.5cm, bottom=1.5cm, headsep=0.8cm, footskip=0.8cm]{geometry}
+% Fonts
+\usepackage[english, russian]{babel}
+% Indent first paragraph
+\usepackage{indentfirst}
+\setlength{\parskip}{5pt}
+% Diagrams
+\usepackage{graphicx}
+\usepackage{float}
+% Page headings
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{16pt}
+%\newfontfamily\namefont[Scale=1.2]{Gloria Hallelujah}
+\fancyhead{}
+
+\usepackage{listings}
+\begin{document}
+
+% Title page
+\begin{titlepage}
+\begin{center}
+
+\textsc{ФГАОУ ВО «Санкт-Петербургский национальный исследовательский университет информационных технологий, механики и оптики»\\[4mm]
+Факультет программной инженерии и компьютерной техники}
+\vfill
+\textbf{Основы системного программирования\\[4mm]
+Лабораторна работа №3\\[25mm]
+}
+\begin{flushright}
+Калугина Марина
+\\[2mm]Группа P3302
+\end{flushright}
+\vfill
+Санкт-Петербург\\[2mm]
+2019 г.
+
+\end{center}
+\end{titlepage}
+
+\section*{Задание}
+Вариант 1: Список пользователей, имеющих право записи в заданный файл.
+
+Вариант 12: Список каталогов, в которыx заданный пользователь имеет право удаления файлов.
+\section*{Скрипт 1}
+\begin{verbatim}
+#!/bin/bash
+
+# проверка введенных параметров
+if [ -z $1 ]
+then
+        echo -e "\
+        Хаос царит в системе,\n\
+        Всё могло быть в порядке, но\n\
+        Отсутствует имя файла."
+        exit 1
+fi
+# проверка существования файла
+if ! [ -n "$(ls -l $1 2>/dev/null | awk '/^-/')" ] 
+then        
+				echo -e  "\
+        Файл, который ты ищещь,\n\
+        Найти невозможно, но\n\
+        Ведь не счесть других."
+        exit 1
+fi
+# ---------OWNER-----------------------
+if [ -n "$(ls -l $1 | awk '/^-.w/')" ]
+then
+	# own_id -- id владельца файла
+	own_id=$(ls -n $1 | awk '{print $3}')
+	# own_name -- имя владельца
+	own_name=$(getent passwd | grep ".*:.*:$own_id" | awk -F":" '{print $1}')	
+fi
+# ---------GROUP-----------------------
+if [ -n "$(ls -l $1 | awk '/^-....w/')" ]
+then
+	# group_id -- id группы
+	group_id=$(ls -n $1 | awk '{print $4}')
+	# group_memp -- пользователи, принадлежащие группе с id = group_id
+	group_memb=$(getent passwd | grep ".*:.*:.*:$group_id" | awk -F":" '{print $1}')
+fi
+# ---------OTHER----------------------
+if [ -n "$(ls -l $1 | awk '/^-.......w/')" ]
+then
+	other=$(getent passwd | awk -F":" '{print $1}')
+fi
+# --------RESULT----------------------
+# результат
+echo -e "Пользователи, имеющие права на запись в файл \"$1\":\n"
+if [ -n "$own_name" ] 
+then 
+	echo -e "Владелец:\n$own_name\n"
+fi 
+if [ -n "$group_memb" ]
+then
+	echo -e "Пользователи группы:\n$group_memb\n"
+fi
+if [ -n "$other" ]
+then
+	echo -e "Остальные пользователи:\n$other\n"
+fi
+\end{verbatim}
+
+\section*{Скрипт 12:}
+\begin{verbatim}
+#!/bin/bash
+# проверка введенных параметров
+if [ -z $1 ]
+then
+        echo -e "\
+        Хаос царит в системе,\n\
+        Всё могло быть в порядке, но\n\
+        Отсутствует имя пользователя."
+        exit 1
+fi
+
+# проверка существования пользователя
+if ! [ -n "$(getent passwd $1)" ] 
+then
+				echo -e  "\
+        Пользователя, которого ты ищещь,\n\
+        Найти невозможно, но\n\
+        Ведь не счесть других."
+        exit 1
+fi
+
+# user_id -- id пользователя 
+user_id=$(getent passwd $1 | awk -F":" '{print $3}')
+# проверка каждого каталога
+for file in $(ls) 
+do
+	if [ ! -d "$file" ]
+	then
+		continue
+	fi
+	user_file_id=$(ls -nd "$file" | awk '{ print $3 }')
+	group_file_id=$(ls -nd "$file" | awk '{ print $4 }')
+	# имеет ли право на запись пользователь, как владелец?
+	if [ $user_id == $user_file_id ]
+	then
+		if [ -n "$(ls -ld $file | awk '/^d..[xs]/')" ]
+		then
+			echo "$file (owner)"
+			continue
+		fi
+	fi
+	# проверка для группы
+	for gr in $(getent passwd | grep ".*:.*:.*:$group_id" | awk -F":" '{print $1}')
+	do
+		gr_id=$(getent group "$gr" | awk '{print $4}')
+		if [ $gr_id == $group_id ]
+		then
+			if [ -n "$(ls -ld $file | awk '/^d.....[xs]/')" ]
+			then
+				echo "$file (group)"
+				continue 2
+			fi
+		fi
+	done
+	# для остальных пользователей
+	if [ -n "$(ls -ld dir | awk '/^d........[tx]/')" ]
+	then
+		echo "$file (other)"
+	fi
+done
+
+\end{verbatim}
+
+\end{document}
