@@ -35,9 +35,31 @@ do
 	# имеет ли право на запись пользователь, как владелец?
 	if [ $user_id == $user_file_id ]
 	then
-		if [ -n $(ls -ld $file | awk -v user="$1" '/^d.w/{print user}') ]
+		if [ -n "$(ls -ld $file | awk '/^d..[xs]/')" ]
 		then
-			echo $1
+			echo "$file (owner)"
+			continue
 		fi
 	fi
+	
+	# проверка для группы
+	for gr in $(getent passwd | grep ".*:.*:.*:$group_id" | awk -F":" '{print $1}')
+	do
+		gr_id=$(getent group "$gr" | awk '{print $4}')
+		if [ $gr_id == $group_id ]
+		then
+			if [ -n "$(ls -ld $file | awk '/^d.....[xs]/')" ]
+			then
+				echo "$file (group)"
+				continue 2
+			fi
+		fi
+	done
+
+	# для остальных пользователей
+	if [ -n "$(ls -ld dir | awk '/^d........[tx]/')" ]
+	then
+		echo "$file (other)"
+	fi
+		
 done
