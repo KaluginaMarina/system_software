@@ -22,6 +22,8 @@ unsigned int parse_flags(int argc, char *argv[]){
                     N = (int) strtol(argv[optind], &p, 10);
                     if (errno != 0 || *p != '\0' || N > INT_MAX) {
                         N = 10;
+                    } else {
+                        optind++;
                     }
                 }
                 if (flags & FLAG_HEAD) {
@@ -37,6 +39,8 @@ unsigned int parse_flags(int argc, char *argv[]){
                     N = (int) strtol(argv[optind], &p, 10);
                     if (errno != 0 || *p != '\0' || N > INT_MAX) {
                         N = 10;
+                    } else {
+                        optind++;
                     }
                 }
                 if (flags & FLAG_TAIL) {
@@ -48,10 +52,12 @@ unsigned int parse_flags(int argc, char *argv[]){
                 flags |= FLAG_HELP;
                 break;
             default:
-                fprintf(stderr, "Неверное значение ключей:\n Cat [-n] [-t|d] [-h] [file]\n");
+                fprintf(stderr, "Неверное значение ключей:\n Cat [-n] [-t|d COUNT] [-h] [FILE]\n");
                 exit(EXIT_FAILURE);
         }
     }
-    printf("%d\n", N);
+    if (optind == argc) {
+        flags |= FLAG_STDIN;
+    }
     return flags;
 }

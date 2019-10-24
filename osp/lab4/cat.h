@@ -6,6 +6,7 @@
 #define FLAG_TAIL 2
 #define FLAG_HEAD 4
 #define FLAG_HELP 8
+#define FLAG_STDIN 16
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
