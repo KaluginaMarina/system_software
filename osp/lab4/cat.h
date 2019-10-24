@@ -36,4 +36,22 @@
  */
 unsigned int parse_flags(int args, char *argv[]);
 
+/**
+ * Функция, осуществляющая утилиту cat
+ * @param flags - флаги ключей
+ * @param filename - имя файла
+ */
+void cat(unsigned int flags, char *filename);
+
+/**
+ * Функция cat без введенного имени файла
+ * получает входной поток из stdin
+ * @param flags - флаги ключей
+ */
+void cat_stdin(unsigned int flags);
+
+/**
+ * Функция, которая овыводит описание работы утилиты
+ */
+void print_help();
 #endif //LAB4_CAT_H

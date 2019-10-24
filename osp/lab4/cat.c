@@ -3,10 +3,13 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <zconf.h>
 #include "cat.h"
-int N = 1;
 
-unsigned int parse_flags(int argc, char *argv[]){
+int N = -1;
+
+unsigned int parse_flags(int argc, char *argv[]) {
     unsigned int flags = 0, opt = 0;
     while ((opt = getopt(argc, argv, "nhtd")) != -1) {
         switch (opt) {
@@ -60,4 +63,54 @@ unsigned int parse_flags(int argc, char *argv[]){
         flags |= FLAG_STDIN;
     }
     return flags;
+}
+
+void cat_stdin(unsigned int flags) {
+    int i = 0;
+    while (i != N) {
+        char str[1024];
+        scanf("%s", str);
+        if (flags & FLAG_NUMBERS) {
+            printf("%d ", i);
+        }
+        printf("%s\n", str);
+        i++;
+    }
+}
+
+void cat(unsigned int flags, char *filename) {
+    if (flags & FLAG_HELP) {
+        print_help();
+    }
+    if (flags & FLAG_STDIN) {
+        cat_stdin(flags);
+        return;
+    }
+
+    int file;
+    errno = 0;
+    file = open(filename, O_RDONLY);
+    if (errno == EACCES) {
+        fprintf(stderr, "Недостаточно прав для открытия файла.\n");
+        exit(EXIT_FAILURE_FILE);
+    } else if (errno == ENOENT) {
+        fprintf(stderr, "Файл не существует.");
+        exit(EXIT_FAILURE_FILE);
+    } else if (errno) {
+        fprintf(stderr, "Невозможно открыть файл.");
+        exit(EXIT_FAILURE_FILE);
+    }
+
+    unsigned int sz = 100;
+    char *bufer = (char *) malloc(sz * sizeof(char));
+
+    if (read(file, bufer, sz) != sz) {
+        fprintf(stderr, "Ошибка чтения файла.\n");
+        exit(EXIT_FAILURE_FILE);
+    }
+    printf("%s\n", bufer);
+}
+
+void print_help() {
+
 }

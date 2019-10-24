@@ -4,10 +4,11 @@
 
 int main(int args, char *argv[]) {
     unsigned int flags = parse_flags(args, argv);
+    char *filename = NULL;
     if (!(flags & FLAG_STDIN)) {
-        char *filename = argv[optind];
+        filename = argv[optind];
         printf("%s\n", filename);
     }
-    printf("-n %d -d %d -t %d -h %d -stdin %d\n", flags & FLAG_NUMBERS, flags & FLAG_HEAD, flags & FLAG_TAIL, flags & FLAG_HELP, flags & FLAG_STDIN);
+    cat(flags, filename);
     return EXIT_SUCCESS;
 }
