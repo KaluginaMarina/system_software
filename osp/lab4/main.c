@@ -9,5 +9,5 @@ int main(int args, char *argv[]) {
         printf("%s\n", filename);
     }
     printf("-n %d -d %d -t %d -h %d -stdin %d\n", flags & FLAG_NUMBERS, flags & FLAG_HEAD, flags & FLAG_TAIL, flags & FLAG_HELP, flags & FLAG_STDIN);
-    return 0;
+    return EXIT_SUCCESS;
 }

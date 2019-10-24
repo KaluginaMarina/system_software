@@ -8,7 +8,7 @@ int N = 1;
 
 unsigned int parse_flags(int argc, char *argv[]){
     unsigned int flags = 0, opt = 0;
-    while ((opt = getopt(argc, argv, "nhtdh")) != -1) {
+    while ((opt = getopt(argc, argv, "nhtd")) != -1) {
         switch (opt) {
             case 'n':
                 flags |= FLAG_NUMBERS;
@@ -28,7 +28,7 @@ unsigned int parse_flags(int argc, char *argv[]){
                 }
                 if (flags & FLAG_HEAD) {
                     fprintf(stderr, "Ключи d и t могут использоваться только по отдельности.\n");
-                    exit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE_KEYS);
                 }
                 break;
             case 'd':
@@ -45,7 +45,7 @@ unsigned int parse_flags(int argc, char *argv[]){
                 }
                 if (flags & FLAG_TAIL) {
                     fprintf(stderr, "Ключи d и t могут использоваться только по отдельности.\n");
-                    exit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE_KEYS);
                 }
                 break;
             case 'h':
@@ -53,7 +53,7 @@ unsigned int parse_flags(int argc, char *argv[]){
                 break;
             default:
                 fprintf(stderr, "Неверное значение ключей:\n Cat [-n] [-t|d COUNT] [-h] [FILE]\n");
-                exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE_KEYS);
         }
     }
     if (optind == argc) {
