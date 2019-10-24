@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <zconf.h>
+#include <sys/stat.h>
 #include "cat.h"
 
 int N = -1;
@@ -87,6 +88,17 @@ void cat(unsigned int flags, char *filename) {
         return;
     }
 
+    char *buffer = NULL;
+    unsigned int sz = read_file(filename, buffer);
+    write_console(buffer, sz, flags);
+
+}
+
+void print_help() {
+
+}
+
+unsigned int read_file(char *filename, char *buffer){
     int file;
     errno = 0;
     file = open(filename, O_RDONLY);
@@ -101,16 +113,24 @@ void cat(unsigned int flags, char *filename) {
         exit(EXIT_FAILURE_FILE);
     }
 
-    unsigned int sz = 100;
-    char *bufer = (char *) malloc(sz * sizeof(char));
+    unsigned int sz = size(file);
+    buffer = (char *) malloc(sz * sizeof(char));
 
-    if (read(file, bufer, sz) != sz) {
+    if (read(file, buffer, sz) != sz) {
         fprintf(stderr, "Ошибка чтения файла.\n");
         exit(EXIT_FAILURE_FILE);
     }
-    printf("%s\n", bufer);
+    return sz;
 }
 
-void print_help() {
+void write_console(char *buffer, unsigned int sz, unsigned int flags){
+    
+}
 
+unsigned int size(int file){
+    unsigned int sz = 0;
+    struct stat buf;
+    fstat(file, &buf);
+    sz = buf.st_size;
+    return sz;
 }

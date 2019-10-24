@@ -7,7 +7,6 @@ int main(int args, char *argv[]) {
     char *filename = NULL;
     if (!(flags & FLAG_STDIN)) {
         filename = argv[optind];
-        printf("%s\n", filename);
     }
     cat(flags, filename);
     return EXIT_SUCCESS;

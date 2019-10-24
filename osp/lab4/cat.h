@@ -54,4 +54,27 @@ void cat_stdin(unsigned int flags);
  * Функция, которая овыводит описание работы утилиты
  */
 void print_help();
+
+/**
+ * Функция для определения размера файла
+ * @param file - дескриптор файла handle
+ * @return размер файла в байтах
+ */
+unsigned int size(int file);
+
+/**
+ * Функция, которая производит чтение с файла
+ * @param filename - имя файла
+ * @param buffer - буфер для записи результата чтения
+ * @return количество прочитанных байт
+ */
+unsigned int read_file(char *filename, char *buffer);
+
+/**
+ * Функция вывода в stdin из буфера
+ * @param buffer - буфер, из которого производится вывод текста
+ * @param sz - размер буфера в байтах
+ * @param flags - флаги ключей
+ */
+void write_console(char *buffer, unsigned int sz, unsigned int flags);
 #endif //LAB4_CAT_H
