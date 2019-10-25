@@ -2,6 +2,7 @@
 
 use Getopt::Long;
 use strict;
+use warnings;
 
 # флаги FLAG_NUMBERS -- вывод номеров строк на каждой строке
 #       FLAG_NUMBER_B -- вывод номеров строк, пропуская пустые строки
@@ -25,6 +26,10 @@ $flags = $key_n ? ($flags | FLAG_NUMBER) : $flags;
 $flags = $key_e ? ($flags | FLAG_END_OF_LINE) : $flags;
 $flags = $key_b ? ($flags | FLAG_NUMBER_B) : $flags;
 
+if($key_b && $key_n) {
+    die "Ключи n и b не могут использоваться вместе";
+}
+
 # cat без файлов (из stdin)
 if (@ARGV == 0) {
     my $i = 1;
@@ -34,20 +39,38 @@ if (@ARGV == 0) {
             print("$i ");
             $i = $i + 1;
         }
-        if (($flags & FLAG_NUMBER_B) && $str != "\n" ) {
+        if (($flags & FLAG_NUMBER_B) && $str ne "\n" ) {
             print("$i ");
             $i = $i + 1;
         }
-        print($str);
         if ($flags & FLAG_END_OF_LINE) {
-            print("\$");
+            $str =~ s/\n/\$\n/;
         }
+        print($str);
     }
 }
 
+my $i = 1;
+# cat для каждого файла
 foreach my $arg (@ARGV) {
-    print($arg);
-    print("\n");
+    open(my $f, '<:encoding(UTF-8)', $arg)
+        or die "Could not open file '$arg' $!";
+    while (my $row = <$f>) {
+        chomp $row;
+        if ($flags & FLAG_NUMBER) {
+            print("$i ");
+            $i = $i + 1;
+        }
+        if (($flags & FLAG_NUMBER_B) && $row ne "" ) {
+            print("$i ");
+            $i = $i + 1;
+        }
+        print("$row");
+        if ($flags & FLAG_END_OF_LINE) {
+            print("\$")
+        }
+        print("\n");
+    }
 }
 
 
