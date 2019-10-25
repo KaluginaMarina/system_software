@@ -48,7 +48,7 @@ if ($flags & FLAG_HELP) {
 # cat без файлов (из stdin)
 if (@ARGV == 0) {
     my $i = 1;
-    while(1) {
+    while(<>) {
         my $str = <STDIN>;
         if ($flags & FLAG_NUMBER) {
             print("$i ");

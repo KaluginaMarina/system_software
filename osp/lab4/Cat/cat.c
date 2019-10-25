@@ -147,7 +147,6 @@ void write_console(char *buffer, unsigned int sz, unsigned int flags) {
         while (i1 != N && cur-- != buffer){
             if (*cur == '\n') {
                 i1++;
-                I++;
             }
         }
     }
