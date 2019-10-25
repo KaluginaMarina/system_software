@@ -16,9 +16,17 @@ unsigned int parse_flags(int argc, char *argv[]) {
         switch (opt) {
             case 'n':
                 flags |= FLAG_NUMBERS;
+                if (flags & FLAG_NUMBER_B) {
+                    fprintf(stderr, "Ключи n и b могут использоваться только по отдельности.\n");
+                    exit(EXIT_FAILURE_KEYS);
+                }
                 break;
             case 'b':
                 flags |= FLAG_NUMBER_B;
+                if (flags & FLAG_NUMBERS) {
+                    fprintf(stderr, "Ключи n и b могут использоваться только по отдельности.\n");
+                    exit(EXIT_FAILURE_KEYS);
+                }
                 break;
             case 'l':
                 flags |= FLAG_TAIL;
@@ -62,7 +70,7 @@ unsigned int parse_flags(int argc, char *argv[]) {
                 flags |= FLAG_END_OF_LINE;
                 break;
             default:
-                fprintf(stderr, "Неверное значение ключей:\n Cat [-n] [-b] [-e] [-l|d COUNT] [-h] [FILE ...]\n");
+                fprintf(stderr, "Неверное значение ключей:\n Cat [-n|b] [-e] [-l|d COUNT] [-h] [FILE ...]\n");
                 exit(EXIT_FAILURE_KEYS);
         }
     }
@@ -127,11 +135,21 @@ char *read_file(char *filename, int *sz) {
 }
 
 void write_console(char *buffer, unsigned int sz, unsigned int flags) {
-    //int i = 1;
+    int i = 0;
     char *cur = buffer, *end = sz + buffer;
-    while (cur != end) {
+    if (flags & FLAG_NUMBERS || ((flags & FLAG_NUMBER_B) && *cur != '\n')) {
+        printf("%d ", ++i);
+    }
+    while (cur < end) {
+        if (*cur == '\n' && (flags & FLAG_END_OF_LINE)) {
+            printf("$");
+        }
         printf("%c", *cur);
-        cur++;
+        if (*cur == '\n' && end >= ++cur && (((flags & FLAG_NUMBERS) && (*cur != '\0')) || (((flags & FLAG_NUMBER_B) && *cur != '\n' && *cur != '\0') || !cur--))){
+            printf("%d ", ++i);
+        } else {
+            cur++;
+        }
     }
 }
 
