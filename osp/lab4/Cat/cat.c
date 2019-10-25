@@ -85,14 +85,15 @@ void cat_stdin(unsigned int flags) {
     int i = 0;
     while (i != N) {
         char str[1024];
-        scanf("%s", str);
-        if (flags & FLAG_NUMBERS) {
-            printf("%d ", I + 1);
+        if (scanf("%s", str) == EOF) {
+            exit(EXIT_SUCCESS);
+        }
+        if (flags & FLAG_NUMBERS || flags & FLAG_NUMBER_B) {
+            printf("%d ", ++I);
         }
         printf("%s", str);
         printf("%s", flags & FLAG_END_OF_LINE ? "$\n" : "\n");
         i++;
-        I++;
     }
 }
 
