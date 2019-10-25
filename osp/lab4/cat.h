@@ -5,17 +5,20 @@
  * Флаги для обрабоки команд:
  * NO_FLAGS -- без флагов
  * FLAG_NUMBERS -- вывод номеров строк на каждой строке
+ * FLAG_NUMBER_B -- вывод номеров строк, пропуская пустые строки
  * FLAG_TAIL -- вывод последних N строк (дефолтное значение N = 10)
  * FLAG_HEAD -- вывод первых N строк (дефолтное значение N = 10)
  * FLAG_HELP -- вывод справки по Cat
  * FLAG_STDIN -- исполнение без файла, работа с stdin
+ * FLAG_END_OF_LINE -- вставлять символ $ в конце каждой строки
  */
-#define NO_FLAGS 0
 #define FLAG_NUMBERS 1
-#define FLAG_TAIL 2
-#define FLAG_HEAD 4
-#define FLAG_HELP 8
-#define FLAG_STDIN 16
+#define FLAG_NUMBER_B 2
+#define FLAG_TAIL 4
+#define FLAG_HEAD 8
+#define FLAG_HELP 16
+#define FLAG_STDIN 32
+#define FLAG_END_OF_LINE 64
 
 /**
  * Коды ошибок

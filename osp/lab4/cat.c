@@ -12,12 +12,15 @@ int N = -1;
 
 unsigned int parse_flags(int argc, char *argv[]) {
     unsigned int flags = 0, opt = 0;
-    while ((opt = getopt(argc, argv, "nhtd")) != -1) {
+    while ((opt = getopt(argc, argv, "nhldbe")) != -1) {
         switch (opt) {
             case 'n':
                 flags |= FLAG_NUMBERS;
                 break;
-            case 't':
+            case 'b':
+                flags |= FLAG_NUMBER_B;
+                break;
+            case 'l':
                 flags |= FLAG_TAIL;
                 char *p;
                 if (optind == argc) {
@@ -31,7 +34,7 @@ unsigned int parse_flags(int argc, char *argv[]) {
                     }
                 }
                 if (flags & FLAG_HEAD) {
-                    fprintf(stderr, "Ключи d и t могут использоваться только по отдельности.\n");
+                    fprintf(stderr, "Ключи d и l могут использоваться только по отдельности.\n");
                     exit(EXIT_FAILURE_KEYS);
                 }
                 break;
@@ -55,8 +58,11 @@ unsigned int parse_flags(int argc, char *argv[]) {
             case 'h':
                 flags |= FLAG_HELP;
                 break;
+            case 'e':
+                flags |= FLAG_END_OF_LINE;
+                break;
             default:
-                fprintf(stderr, "Неверное значение ключей:\n Cat [-n] [-t|d COUNT] [-h] [FILE]\n");
+                fprintf(stderr, "Неверное значение ключей:\n Cat [-n] [-b] [-e] [-l|d COUNT] [-h] [FILE ...]\n");
                 exit(EXIT_FAILURE_KEYS);
         }
     }
@@ -72,9 +78,10 @@ void cat_stdin(unsigned int flags) {
         char str[1024];
         scanf("%s", str);
         if (flags & FLAG_NUMBERS) {
-            printf("%d ", i);
+            printf("%d ", i + 1);
         }
-        printf("%s\n", str);
+        printf("%s", str);
+        printf("%s", flags & FLAG_END_OF_LINE ? "$\n" : "\n");
         i++;
     }
 }
@@ -94,11 +101,7 @@ void cat(unsigned int flags, char *filename) {
 
 }
 
-void print_help() {
-
-}
-
-unsigned int read_file(char *filename, char *buffer){
+unsigned int read_file(char *filename, char *buffer) {
     int file;
     errno = 0;
     file = open(filename, O_RDONLY);
@@ -123,14 +126,23 @@ unsigned int read_file(char *filename, char *buffer){
     return sz;
 }
 
-void write_console(char *buffer, unsigned int sz, unsigned int flags){
-    
+void write_console(char *buffer, unsigned int sz, unsigned int flags) {
+    //int i = 1;
+    char *cur = buffer, *end = sz + buffer;
+    while (cur != end) {
+        printf("%c\n", *cur);
+        cur++;
+    }
 }
 
-unsigned int size(int file){
+unsigned int size(int file) {
     unsigned int sz = 0;
     struct stat buf;
     fstat(file, &buf);
     sz = buf.st_size;
     return sz;
+}
+
+void print_help() {
+
 }
