@@ -136,7 +136,16 @@ char *read_file(char *filename, int *sz) {
 
 void write_console(char *buffer, unsigned int sz, unsigned int flags) {
     int i = 0;
+    int i1 = 0;
     char *cur = buffer, *end = sz + buffer;
+    if (flags & FLAG_TAIL) {
+        cur = end;
+        while (i1 != N && cur-- != buffer){
+            if (*cur == '\n') {
+                i1++;
+            }
+        }
+    }
     if (flags & FLAG_NUMBERS || ((flags & FLAG_NUMBER_B) && *cur != '\n')) {
         printf("%d ", ++i);
     }
@@ -145,7 +154,14 @@ void write_console(char *buffer, unsigned int sz, unsigned int flags) {
             printf("$");
         }
         printf("%c", *cur);
-        if (*cur == '\n' && end >= ++cur && (((flags & FLAG_NUMBERS) && (*cur != '\0')) || (((flags & FLAG_NUMBER_B) && *cur != '\n' && *cur != '\0') || !cur--))){
+        if (flags & FLAG_HEAD && *cur == '\n'){
+            i1++;
+            if (i1 == N){
+                break;
+            }
+        }
+        if (*cur == '\n' && end >= ++cur && (((flags & FLAG_NUMBERS) && (*cur != '\0')) ||
+                                             (((flags & FLAG_NUMBER_B) && *cur != '\n' && *cur != '\0') || !cur--))) {
             printf("%d ", ++i);
         } else {
             cur++;

@@ -1,4 +1,5 @@
 regexp/
-osp/lab4/cmake-build-debug/
-osp/lab4/.idea
-osp/lab4/Cat
+osp/lab4/Cat/cmake-build-debug/
+osp/lab4/Cat/.idea
+osp/lab4/Cat/Cat
+osp/lab4/Cat/test.txt
