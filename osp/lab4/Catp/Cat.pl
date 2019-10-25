@@ -7,27 +7,42 @@ use warnings;
 # флаги FLAG_NUMBERS -- вывод номеров строк на каждой строке
 #       FLAG_NUMBER_B -- вывод номеров строк, пропуская пустые строки
 #       FLAG_END_OF_LINE -- вывод с добавлением $ в конце каждой строки
+#       FLAG_HELP -- вывод справки
 use constant {
     FLAG_NUMBER => 1,
     FLAG_NUMBER_B => 2,
     FLAG_END_OF_LINE => 4,
+    FLAG_HELP => 8,
 };
 
 # получение ключей из argv и создания маски с флагами $flags
 my $flags = 0;
 my $key_n;
 my $key_e;
-my $key_b;		
+my $key_b;
+my $key_h;		
 GetOptions ('n' => \$key_n,
             'e' => \$key_e,
-            'b' => \$key_b);
+            'b' => \$key_b,
+            'h' => \$key_h);
 
 $flags = $key_n ? ($flags | FLAG_NUMBER) : $flags;
 $flags = $key_e ? ($flags | FLAG_END_OF_LINE) : $flags;
 $flags = $key_b ? ($flags | FLAG_NUMBER_B) : $flags;
+$flags = $key_h ? ($flags | FLAG_HELP) : $flags;
 
 if($key_b && $key_n) {
     die "Ключи n и b не могут использоваться вместе";
+}
+
+# вывод справки
+if ($flags & FLAG_HELP) {
+    open(my $fh, '<:encoding(UTF-8)', "help.txt");
+    while (my $row = <$fh>) {
+        chomp $row;
+        print("$row\n");
+    }
+    close($fh);
 }
 
 # cat без файлов (из stdin)
@@ -71,7 +86,5 @@ foreach my $arg (@ARGV) {
         }
         print("\n");
     }
+    close($f);
 }
-
-
-
