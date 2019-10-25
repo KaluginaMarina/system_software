@@ -5,9 +5,13 @@
 int main(int args, char *argv[]) {
     unsigned int flags = parse_flags(args, argv);
     char *filename = NULL;
-    if (!(flags & FLAG_STDIN)) {
+    while(optind != args) {
         filename = argv[optind];
+        optind++;
+        cat(flags, filename);
     }
-    cat(flags, filename);
+    if (flags & FLAG_STDIN) {
+        cat(flags, filename);
+    }
     return EXIT_SUCCESS;
 }
