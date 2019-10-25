@@ -68,10 +68,10 @@ unsigned int size(int file);
 /**
  * Функция, которая производит чтение с файла
  * @param filename - имя файла
- * @param buffer - буфер для записи результата чтения
- * @return количество прочитанных байт
+ * @param sz - указатель на переменную, в которую записывается размер файла в байтах
+ * @return указатель на буфер с результатом чтения с файла
  */
-unsigned int read_file(char *filename, char *buffer);
+char *read_file(char *filename, int *sz);
 
 /**
  * Функция вывода в stdin из буфера

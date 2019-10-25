@@ -95,13 +95,13 @@ void cat(unsigned int flags, char *filename) {
         return;
     }
 
-    char *buffer = NULL;
-    unsigned int sz = read_file(filename, buffer);
+    int sz;
+    char *buffer = read_file(filename, &sz);
     write_console(buffer, sz, flags);
 
 }
 
-unsigned int read_file(char *filename, char *buffer) {
+char *read_file(char *filename, int *sz) {
     int file;
     errno = 0;
     file = open(filename, O_RDONLY);
@@ -116,21 +116,21 @@ unsigned int read_file(char *filename, char *buffer) {
         exit(EXIT_FAILURE_FILE);
     }
 
-    unsigned int sz = size(file);
-    buffer = (char *) malloc(sz * sizeof(char));
+    *sz = size(file);
+    char *buffer = (char *) malloc(*sz * sizeof(char));
 
-    if (read(file, buffer, sz) != sz) {
+    if (read(file, buffer, *sz) != *sz) {
         fprintf(stderr, "Ошибка чтения файла.\n");
         exit(EXIT_FAILURE_FILE);
     }
-    return sz;
+    return buffer;
 }
 
 void write_console(char *buffer, unsigned int sz, unsigned int flags) {
     //int i = 1;
     char *cur = buffer, *end = sz + buffer;
     while (cur != end) {
-        printf("%c\n", *cur);
+        printf("%c", *cur);
         cur++;
     }
 }
