@@ -9,6 +9,7 @@
 #include "cat.h"
 
 int N = -1;
+int I = 0;
 
 unsigned int parse_flags(int argc, char *argv[]) {
     unsigned int flags = 0, opt = 0;
@@ -86,11 +87,12 @@ void cat_stdin(unsigned int flags) {
         char str[1024];
         scanf("%s", str);
         if (flags & FLAG_NUMBERS) {
-            printf("%d ", i + 1);
+            printf("%d ", I + 1);
         }
         printf("%s", str);
         printf("%s", flags & FLAG_END_OF_LINE ? "$\n" : "\n");
         i++;
+        I++;
     }
 }
 
@@ -131,6 +133,7 @@ char *read_file(char *filename, int *sz) {
         fprintf(stderr, "Ошибка чтения файла.\n");
         exit(EXIT_FAILURE_FILE);
     }
+    close(file);
     return buffer;
 }
 
@@ -143,11 +146,13 @@ void write_console(char *buffer, unsigned int sz, unsigned int flags) {
         while (i1 != N && cur-- != buffer){
             if (*cur == '\n') {
                 i1++;
+                I++;
             }
         }
     }
     if (flags & FLAG_NUMBERS || ((flags & FLAG_NUMBER_B) && *cur != '\n')) {
-        printf("%d ", ++i);
+        printf("%d ", ++I);
+        i++;
     }
     while (cur < end) {
         if (*cur == '\n' && (flags & FLAG_END_OF_LINE)) {
@@ -162,7 +167,8 @@ void write_console(char *buffer, unsigned int sz, unsigned int flags) {
         }
         if (*cur == '\n' && end >= ++cur && (((flags & FLAG_NUMBERS) && (*cur != '\0')) ||
                                              (((flags & FLAG_NUMBER_B) && *cur != '\n' && *cur != '\0') || !cur--))) {
-            printf("%d ", ++i);
+            printf("%d ", ++I);
+            i++;
         } else {
             cur++;
         }
