@@ -4,10 +4,10 @@
 #include <bits/types/time_t.h>
 
 time_t  start_time; // начала работы сервера
+time_t work_time; // время работы системы в секундах
 long int pid; // id процесса
 long int uid; // id пользователя
 long int gid;  // id группы процесса
-time_t work_time; // время работы системы в секундах
 double loadavg[3]; // загрузка системы за последние 1, 5, 15 минут
 
 /**

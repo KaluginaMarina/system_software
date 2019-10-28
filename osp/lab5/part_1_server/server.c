@@ -6,8 +6,7 @@
 #include "server.h"
 
 void start_server(){
-    time_t  start;
-    time(&start);
+    time(&start_time);
     pid = getpid();
     uid = getuid();
     gid = getgid();
@@ -22,5 +21,4 @@ void set_param(){
     time(&now);
     work_time = now - start_time;
     getloadavg(loadavg, 3);
-    printf("%ld -- %f %f %f\n", work_time, loadavg[0], loadavg[1], loadavg[2]);
 }
