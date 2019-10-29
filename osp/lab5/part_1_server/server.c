@@ -3,22 +3,42 @@
 #include <zconf.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <sys/shm.h>
+#include <errno.h>
 #include "server.h"
 
 void start_server(){
-    time(&start_time);
-    pid = getpid();
-    uid = getuid();
-    gid = getgid();
+    errno = 0;
+    int mem_id = shmget(256, sizeof(struct server_param), IPC_CREAT);
+    if(mem_id < 0){
+        fprintf(stderr, "Error: shmget.\n");
+        exit(1);
+    }
+
+    struct server_param *server_param = (struct server_param*)shmat(mem_id, NULL, 0);
+    if (server_param == NULL) {
+        fprintf(stderr, "Error: shmat.\n");
+        exit(1);
+    }
+
+    if (EACCES == errno) {
+        fprintf(stderr, "Permission denied\n");
+        exit(1);
+    }
+
+    time(&server_param->start_time);
+    server_param->pid = getpid();
+    server_param->uid = getuid();
+    server_param->gid = getgid();
     while (true){
         sleep(1);
-        set_param();
+        set_param(server_param);
     }
 }
 
-void set_param(){
+void set_param(struct server_param *server_param){
     time_t now;
     time(&now);
-    work_time = now - start_time;
-    getloadavg(loadavg, 3);
+    server_param->work_time = now - server_param->start_time;
+    getloadavg(server_param->loadavg, 3);
 }
