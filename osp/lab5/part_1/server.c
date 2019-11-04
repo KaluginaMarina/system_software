@@ -8,7 +8,7 @@
 #include "server.h"
 
 void start_server(int argc, char *argv[]) {
-    parse_flag(argc, argv);
+    flag = parse_flag(argc, argv);
     errno = 0;
     int mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | 0644);
     if (mem_id < 0) {
@@ -46,9 +46,8 @@ void set_param(struct server_param *server_param) {
     getloadavg(server_param->loadavg, 3);
 }
 
-void parse_flag(int argc, char *argv[]) {
-    flag = 0;
-    unsigned int opt = 0;
+unsigned int parse_flag(int argc, char *argv[]) {
+    unsigned int flag = 0, opt = 0;
     while ((opt = getopt(argc, argv, "sqf")) != -1) {
         switch (opt) {
             case 's':
@@ -85,4 +84,5 @@ void parse_flag(int argc, char *argv[]) {
                 "Не указан способ передачи сообщения между клиентом и сервером.\nИспользуйте: \n\t./server -s|-q|-f.\n");
         exit(1);
     }
+    return flag;
 }

@@ -42,6 +42,7 @@ void set_param(struct server_param *server_param);
  * Функция для получения ключей из командной строки
  * @param argc - аргументы командной строки
  * @param argv - аргументы командной строки
+ * @return -- флаги ключей
  */
-void parse_flag(int argc, char *argv[]);
+unsigned int parse_flag(int argc, char *argv[]);
 #endif //PART_1_SERVER_SERVER_H
