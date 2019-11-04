@@ -3,7 +3,7 @@
 #include <zconf.h>
 #include "server.h"
 
-int main() {
-    start_server();
+int main(int argc, char* argv[]) {
+    start_server(argc, argv);
     return 0;
 }
