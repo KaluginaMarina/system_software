@@ -9,7 +9,7 @@
 
 void start_server(){
     errno = 0;
-    int mem_id = shmget(256, sizeof(struct server_param), IPC_CREAT);
+    int mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | 0644);
     if(mem_id < 0){
         fprintf(stderr, "Error: shmget.\n");
         exit(1);
@@ -33,6 +33,7 @@ void start_server(){
     while (true){
         sleep(1);
         set_param(server_param);
+        printf("%d %f %f %f \n", server_param->work_time, server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
     }
 }
 
