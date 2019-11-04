@@ -7,16 +7,16 @@
 #include <errno.h>
 #include "server.h"
 
-void start_server(int argc, char *argv[]){
+void start_server(int argc, char *argv[]) {
     parse_flag(argc, argv);
     errno = 0;
     int mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | 0644);
-    if(mem_id < 0){
+    if (mem_id < 0) {
         fprintf(stderr, "Error: shmget.\n");
         exit(1);
     }
 
-    struct server_param *server_param = (struct server_param*)shmat(mem_id, NULL, 0);
+    struct server_param *server_param = (struct server_param *) shmat(mem_id, NULL, 0);
     if (server_param == NULL) {
         fprintf(stderr, "Error: shmat.\n");
         exit(1);
@@ -33,21 +33,20 @@ void start_server(int argc, char *argv[]){
     server_param->gid = getgid();
 
     printf("Сервер запущен.\n");
-    while (true){
+    while (true) {
         sleep(1);
         set_param(server_param);
-        //printf("%d %f %f %f \n", server_param->work_time, server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
     }
 }
 
-void set_param(struct server_param *server_param){
+void set_param(struct server_param *server_param) {
     time_t now;
     time(&now);
     server_param->work_time = now - server_param->start_time;
     getloadavg(server_param->loadavg, 3);
 }
 
-void parse_flag(int argc, char *argv[]){
+void parse_flag(int argc, char *argv[]) {
     flag = 0;
     unsigned int opt = 0;
     while ((opt = getopt(argc, argv, "sqf")) != -1) {
@@ -58,6 +57,7 @@ void parse_flag(int argc, char *argv[]){
                     fprintf(stderr, "Встречено несколько флагов.\n");
                     exit(1);
                 }
+                printf("Клиент-серверное взаимодействие осуществляется при помощи разделяемых сегментов памяти.\n");
                 break;
             case 'q':
                 flag |= MESSAGE_QUEUE;
@@ -65,6 +65,7 @@ void parse_flag(int argc, char *argv[]){
                     fprintf(stderr, "Встречено несколько флагов.\n");
                     exit(1);
                 }
+                printf("Клиент-серверное взаимодействие осуществляется при помощи System V message queue.\n");
                 break;
             case 'f':
                 flag |= MMAP_FILE;
@@ -72,6 +73,7 @@ void parse_flag(int argc, char *argv[]){
                     fprintf(stderr, "Встречено несколько флагов.\n");
                     exit(1);
                 }
+                printf("Клиент-серверное взаимодействие осуществляется при помощи файла, отображённого в память с использованием mmap.\n");
                 break;
             default:
                 fprintf(stderr, "Используйте: \n\t./server -s|-q|-f.\n");
@@ -79,8 +81,8 @@ void parse_flag(int argc, char *argv[]){
         }
     }
     if (!flag) {
-        fprintf(stderr, "Не указан способ передачи сообщения между клиентом и сервером.\nИспользуйте: \n\t./server -s|-q|-f.\n");
+        fprintf(stderr,
+                "Не указан способ передачи сообщения между клиентом и сервером.\nИспользуйте: \n\t./server -s|-q|-f.\n");
         exit(1);
     }
-    printf("%d", flag);
 }
