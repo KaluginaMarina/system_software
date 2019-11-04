@@ -7,8 +7,7 @@
 #include <errno.h>
 #include "server.h"
 
-void start_server(int argc, char *argv[]) {
-    flag = parse_flag(argc, argv);
+struct server_param* shared_memory_param(){
     errno = 0;
     int mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | 0644);
     if (mem_id < 0) {
@@ -32,10 +31,27 @@ void start_server(int argc, char *argv[]) {
     server_param->uid = getuid();
     server_param->gid = getgid();
 
-    printf("Сервер запущен.\n");
+    printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
+           server_param->gid);
+    printf("Используются разделяемый сегмент, mem_id = %d\n", mem_id);
+    return server_param;
+}
+
+void start_server(int argc, char *argv[]) {
+    flag = parse_flag(argc, argv);
+    struct server_param *server_param;
+    if (flag & SHARED_MEMORY) {
+        server_param = shared_memory_param();
+    } else if (flag & MESSAGE_QUEUE) {
+      //MESSAGE_QUEUE
+    } else if (flag & MMAP_FILE) {
+        //MMAP_FILE
+    }
     while (true) {
         sleep(1);
         set_param(server_param);
+        printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time, server_param->loadavg[0],
+               server_param->loadavg[1], server_param->loadavg[2]);
     }
 }
 

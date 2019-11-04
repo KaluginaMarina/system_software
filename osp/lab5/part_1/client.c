@@ -7,9 +7,9 @@
 #include "client.h"
 
 
-void get_param(int argc, char* argv[]) {
+void get_param(int argc, char *argv[]) {
     int mem_id;
-    char* filename = malloc(256 * sizeof(char));
+    char *filename = malloc(256 * sizeof(char));
     flag = parse_flag_cl(argc, argv, &mem_id, filename);
 
     if (flag & SHARED_MEMORY) {
@@ -24,9 +24,9 @@ void get_param(int argc, char* argv[]) {
     }
 }
 
-unsigned int parse_flag_cl(int argc, char* argv[], int* mem_id, char* filename) {
+unsigned int parse_flag_cl(int argc, char *argv[], int *mem_id, char *filename) {
     unsigned int flag = 0, opt = 0;
-    char* p;
+    char *p;
     while ((opt = getopt(argc, argv, "sqf")) != -1) {
         switch (opt) {
             case 's':

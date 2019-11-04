@@ -45,4 +45,11 @@ void set_param(struct server_param *server_param);
  * @return -- флаги ключей
  */
 unsigned int parse_flag(int argc, char *argv[]);
+
+/**
+ * Функция для хранения требуемой информации и обмена информацией между клиентом и сервером
+ * при помощи разделяемого сегмента памяти
+ * @return указатель на структуру
+ */
+struct server_param* shared_memory_param();
 #endif //PART_1_SERVER_SERVER_H
