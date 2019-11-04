@@ -19,4 +19,11 @@ void get_param(int argc, char* argv[]);
  * @return - флаги клчюей
  */
 unsigned int parse_flag_cl(int argc, char* argv[], int* mem_id, char* filename);
+
+/**
+ * Функция для получения требуемой информации и обмена информацией между клиентом и сервером
+ * при помощи разделяемого сегмента памяти
+ * @param mem_id -- значение сегмента памяти
+ */
+void get_param_shared_memory(int mem_id);
 #endif //PART_1_CLIENT_H

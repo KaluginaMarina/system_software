@@ -2,10 +2,23 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/shm.h>
 #include <string.h>
 #include "server.h"
 #include "client.h"
 
+void get_param_shared_memory(int mem_id) {
+    printf("Клиент-серверное взаимодействие осуществляется при помощи разделяемых сегментов памяти.\n");
+    printf("mem_id = %d\n", mem_id);
+    errno = 0;
+    struct server_param *serverparam = (struct server_param*) shmat(mem_id, NULL, SHM_RDONLY);
+    if (errno) {
+        fprintf(stderr, "Невозможно получить доступ к указаной памяти.\n");
+        exit(1);
+    }
+    printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", serverparam->work_time,
+           serverparam->loadavg[0], serverparam->loadavg[1], serverparam->loadavg[2]);
+}
 
 void get_param(int argc, char *argv[]) {
     int mem_id;
@@ -13,8 +26,7 @@ void get_param(int argc, char *argv[]) {
     flag = parse_flag_cl(argc, argv, &mem_id, filename);
 
     if (flag & SHARED_MEMORY) {
-        printf("Клиент-серверное взаимодействие осуществляется при помощи разделяемых сегментов памяти.\n");
-        printf("mem_id = %d\n", mem_id);
+        get_param_shared_memory(mem_id);
     } else if (flag & MESSAGE_QUEUE) {
         printf("Клиент-серверное взаимодействие осуществляется при помощи System V message queue.\n");
         printf("mem_id = %d\n", mem_id);
