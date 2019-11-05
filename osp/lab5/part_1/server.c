@@ -3,9 +3,20 @@
 #include <zconf.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/shm.h>
+#include <sys/msg.h>
+#include <sys/ipc.h>
+#include <sys/types.h>
 #include <errno.h>
 #include "server.h"
+
+void set_ids(struct server_param *server_param){
+    time(&server_param->start_time);
+    server_param->pid = getpid();
+    server_param->uid = getuid();
+    server_param->gid = getgid();
+}
 
 struct server_param* shared_memory_param(){
     errno = 0;
@@ -26,10 +37,7 @@ struct server_param* shared_memory_param(){
         exit(1);
     }
 
-    time(&server_param->start_time);
-    server_param->pid = getpid();
-    server_param->uid = getuid();
-    server_param->gid = getgid();
+    set_ids(server_param);
 
     printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
            server_param->gid);
@@ -37,19 +45,52 @@ struct server_param* shared_memory_param(){
     return server_param;
 }
 
+struct server_param* message_queue_param(int *mem_id) {
+    errno = 0;
+    *mem_id = msgget(IPC_PRIVATE, IPC_CREAT | 0644);
+    if (errno) {
+        fprintf(stderr, "Невозможно создать очередь сообщений.\n");
+        exit(1);
+    }
+
+    struct server_param* server_param = malloc(sizeof(struct server_param));
+
+    set_ids(server_param);
+
+    printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
+           server_param->gid);
+    printf("Используются очередь сообщений, mem_id = %d\n", *mem_id);
+    return server_param;
+}
+
 void start_server(int argc, char *argv[]) {
     flag = parse_flag(argc, argv);
+    int mem_id = 0;
     struct server_param *server_param;
     if (flag & SHARED_MEMORY) {
         server_param = shared_memory_param();
     } else if (flag & MESSAGE_QUEUE) {
-      //MESSAGE_QUEUE
+      server_param = message_queue_param(&mem_id);
     } else if (flag & MMAP_FILE) {
         //MMAP_FILE
     }
     while (true) {
         sleep(1);
         set_param(server_param);
+        if (flag & MESSAGE_QUEUE) {
+            struct msgbuf msg = {
+
+            };
+            errno = 0;
+            msgrcv(mem_id, &msg, 0, 1, 0); // mstype == 1 => type query
+            if (errno) {
+                fprintf(stderr, "Невозможно создать сообщение.\n");
+                exit(1);
+            }
+            msg.mtype = 2; // reply
+            memcpy(msg.mtext, server_param, sizeof(struct server_param));
+            msgsnd(mem_id, &msg, sizeof(struct server_param), 0);
+        }
         printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time, server_param->loadavg[0],
                server_param->loadavg[1], server_param->loadavg[2]);
     }

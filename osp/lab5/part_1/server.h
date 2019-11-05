@@ -13,8 +13,14 @@
 #define MESSAGE_QUEUE 2
 #define MMAP_FILE 4
 
+/**
+ * флаг
+ */
 unsigned int flag;
 
+/**
+ * хранение параметров сервера
+ */
 struct server_param {
     time_t start_time; // начала работы сервера
     time_t work_time; // время работы системы в секундах
@@ -22,6 +28,11 @@ struct server_param {
     long int uid; // id пользователя
     long int gid;  // id группы процесса
     double loadavg[3]; // загрузка системы за последние 1, 5, 15 минут
+};
+
+struct msgbuf {
+    long mtype;
+    char mtext[sizeof(struct server_param)];
 };
 
 /**
@@ -52,4 +63,17 @@ unsigned int parse_flag(int argc, char *argv[]);
  * @return указатель на структуру
  */
 struct server_param* shared_memory_param();
+
+/**
+ * Функция для хранения требуемой информации и обмена информацией между клиентом и сервером
+ * при помощи System V message queue
+ * @return указатель на структуру
+ */
+struct server_param* message_queue_param();
+
+/**
+ * Функция устанавливает параметры pid, gid, uid и start_time
+ * @param server_param -- указатель на структуру server_param
+ */
+void set_ids(struct server_param *server_param);
 #endif //PART_1_SERVER_SERVER_H
