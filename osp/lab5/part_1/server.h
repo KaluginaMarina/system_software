@@ -14,6 +14,11 @@
 #define MMAP_FILE 4
 
 /**
+ * права для обращения к файлам и сегментам памяти
+ */
+#define PERM 0644
+
+/**
  * флаг
  */
 unsigned int flag;
@@ -70,6 +75,13 @@ struct server_param* shared_memory_param();
  * @return указатель на структуру
  */
 struct server_param* message_queue_param();
+
+/**
+ * Функция для обмена информации при помощи файла, отображённого в память с использованием mmap
+ * @param filename -- имя файла
+ * @return указатель на структуру
+ */
+struct server_param* mmap_file(char* filename);
 
 /**
  * Функция устанавливает параметры pid, gid, uid и start_time
