@@ -87,12 +87,15 @@ struct server_param *mmap_file(char *filename) {
         exit(1);
     }
     set_ids(server_param);
-    
+    printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
+           server_param->gid);
+    printf("Используются файл, filename = \"%s\"\n", filename);
     return server_param;
 }
 
 void start_server(int argc, char *argv[]) {
-    flag = parse_flag(argc, argv);
+    char* filename = malloc(256 * sizeof(char));
+    flag = parse_flag(argc, argv, filename);
     int mem_id = 0;
     struct server_param *server_param;
     if (flag & SHARED_MEMORY) {
@@ -100,7 +103,7 @@ void start_server(int argc, char *argv[]) {
     } else if (flag & MESSAGE_QUEUE) {
         server_param = message_queue_param(&mem_id);
     } else if (flag & MMAP_FILE) {
-        server_param = mmap_file("test.txt");
+        server_param = mmap_file(filename);
     }
     while (true) {
         sleep(1);
@@ -130,7 +133,7 @@ void set_param(struct server_param *server_param) {
     getloadavg(server_param->loadavg, 3);
 }
 
-unsigned int parse_flag(int argc, char *argv[]) {
+unsigned int parse_flag(int argc, char *argv[], char* filename) {
     unsigned int flag = 0, opt = 0;
     while ((opt = getopt(argc, argv, "sqf")) != -1) {
         switch (opt) {
@@ -156,16 +159,22 @@ unsigned int parse_flag(int argc, char *argv[]) {
                     fprintf(stderr, "Встречено несколько флагов.\n");
                     exit(1);
                 }
+                if (optind == argc) {
+                    fprintf(stderr, "Не указано имя файла.\n");
+                    exit(1);
+                }
+                strcpy(filename, argv[optind]);
+                optind++;
                 printf("Клиент-серверное взаимодействие осуществляется при помощи файла, отображённого в память с использованием mmap.\n");
                 break;
             default:
-                fprintf(stderr, "Используйте: \n\t./server -s|-q|-f.\n");
+                fprintf(stderr, "Используйте: \n\t./server -s|-q|-f filename.\n");
                 exit(1);
         }
     }
     if (!flag) {
         fprintf(stderr,
-                "Не указан способ передачи сообщения между клиентом и сервером.\nИспользуйте: \n\t./server -s|-q|-f.\n");
+                "Не указан способ передачи сообщения между клиентом и сервером.\nИспользуйте: \n\t./server -s|-q|-f filename.\n");
         exit(1);
     }
     return flag;

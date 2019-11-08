@@ -58,9 +58,10 @@ void set_param(struct server_param *server_param);
  * Функция для получения ключей из командной строки
  * @param argc - аргументы командной строки
  * @param argv - аргументы командной строки
+ * @param filename - указатель на запись строки с ключом -f
  * @return -- флаги ключей
  */
-unsigned int parse_flag(int argc, char *argv[]);
+unsigned int parse_flag(int argc, char *argv[], char* filename);
 
 /**
  * Функция для хранения требуемой информации и обмена информацией между клиентом и сервером
