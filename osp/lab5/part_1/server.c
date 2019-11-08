@@ -7,20 +7,21 @@
 #include <sys/shm.h>
 #include <sys/msg.h>
 #include <sys/ipc.h>
-#include <sys/types.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include "server.h"
 
-void set_ids(struct server_param *server_param){
+void set_ids(struct server_param *server_param) {
     time(&server_param->start_time);
     server_param->pid = getpid();
     server_param->uid = getuid();
     server_param->gid = getgid();
 }
 
-struct server_param* shared_memory_param(){
+struct server_param *shared_memory_param() {
     errno = 0;
-    int mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | 0644);
+    int mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | PERM);
     if (mem_id < 0) {
         fprintf(stderr, "Error: shmget.\n");
         exit(1);
@@ -45,21 +46,48 @@ struct server_param* shared_memory_param(){
     return server_param;
 }
 
-struct server_param* message_queue_param(int *mem_id) {
+struct server_param *message_queue_param(int *mem_id) {
     errno = 0;
-    *mem_id = msgget(IPC_PRIVATE, IPC_CREAT | 0644);
+    // TODO: починииь это
+    *mem_id = msgget(IPC_PRIVATE, IPC_CREAT | PERM);
     if (errno) {
         fprintf(stderr, "Невозможно создать очередь сообщений.\n");
         exit(1);
     }
 
-    struct server_param* server_param = malloc(sizeof(struct server_param));
+    struct server_param *server_param = malloc(sizeof(struct server_param));
 
     set_ids(server_param);
 
     printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
            server_param->gid);
     printf("Используются очередь сообщений, mem_id = %d\n", *mem_id);
+    return server_param;
+}
+
+struct server_param *mmap_file(char *filename) {
+    errno = 0;
+    int file = open(filename, O_CREAT | O_RDWR, PERM);
+    if (errno == EACCES) {
+        fprintf(stderr, "Нет прав на запись в данный файл/компонент пути.\n");
+        exit(1);
+    } else if (errno) {
+        fprintf(stderr, "Невозможно создать/открыть файл.\n");
+        exit(1);
+    }
+    ftruncate(file, sizeof(struct server_param));
+    if (errno) {
+        fprintf(stderr, "Невозможно открыть файл.\n");
+        exit(1);
+    }
+    struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_WRITE,
+                                                                     MAP_SHARED, file, 0);
+    if (errno) {
+        fprintf(stderr, "Невозможно отобразить файл.\n");
+        exit(1);
+    }
+    set_ids(server_param);
+    
     return server_param;
 }
 
@@ -70,17 +98,15 @@ void start_server(int argc, char *argv[]) {
     if (flag & SHARED_MEMORY) {
         server_param = shared_memory_param();
     } else if (flag & MESSAGE_QUEUE) {
-      server_param = message_queue_param(&mem_id);
+        server_param = message_queue_param(&mem_id);
     } else if (flag & MMAP_FILE) {
-        //MMAP_FILE
+        server_param = mmap_file("test.txt");
     }
     while (true) {
         sleep(1);
         set_param(server_param);
         if (flag & MESSAGE_QUEUE) {
-            struct msgbuf msg = {
-
-            };
+            struct msgbuf msg;
             errno = 0;
             msgrcv(mem_id, &msg, 0, 1, 0); // mstype == 1 => type query
             if (errno) {
@@ -91,7 +117,8 @@ void start_server(int argc, char *argv[]) {
             memcpy(msg.mtext, server_param, sizeof(struct server_param));
             msgsnd(mem_id, &msg, sizeof(struct server_param), 0);
         }
-        printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time, server_param->loadavg[0],
+        printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time,
+               server_param->loadavg[0],
                server_param->loadavg[1], server_param->loadavg[2]);
     }
 }
