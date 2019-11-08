@@ -108,7 +108,9 @@ void cat(unsigned int flags, char *filename) {
 
     int sz;
     char *buffer = read_file(filename, &sz);
-    write_console(buffer, sz, flags);
+    if (buffer != NULL) {
+    	write_console(buffer, sz, flags);
+    }
 
 }
 
@@ -118,13 +120,13 @@ char *read_file(char *filename, int *sz) {
     file = open(filename, O_RDONLY);
     if (errno == EACCES) {
         fprintf(stderr, "Недостаточно прав для открытия файла.\n");
-        exit(EXIT_FAILURE_FILE);
+    	return NULL;
     } else if (errno == ENOENT) {
-        fprintf(stderr, "Файл не существует.");
-        exit(EXIT_FAILURE_FILE);
+        fprintf(stderr, "Файл не существует.\n");
+    	return NULL;
     } else if (errno) {
-        fprintf(stderr, "Невозможно открыть файл.");
-        exit(EXIT_FAILURE_FILE);
+        fprintf(stderr, "Невозможно открыть файл.\n");
+	return NULL;
     }
 
     *sz = size(file);
@@ -201,3 +203,4 @@ void print_help() {
            "Ключи -d и -l не используются вместе\n"
            "==============================================\n\n");
 }
+
