@@ -26,4 +26,10 @@ unsigned int parse_flag_cl(int argc, char* argv[], int* mem_id, char* filename);
  * @param mem_id -- значение сегмента памяти
  */
 void get_param_shared_memory(int mem_id);
+
+/**
+ * Функция для получения информации от сервера с использованием файла, отображенного mmap
+ * @param filename -- имя файла
+ */
+void get_param_mmap_file(char* filename);
 #endif //PART_1_CLIENT_H

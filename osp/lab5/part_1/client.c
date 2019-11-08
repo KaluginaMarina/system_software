@@ -4,6 +4,8 @@
 #include <errno.h>
 #include <sys/shm.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 #include "server.h"
 #include "client.h"
 
@@ -11,13 +13,31 @@ void get_param_shared_memory(int mem_id) {
     printf("Клиент-серверное взаимодействие осуществляется при помощи разделяемых сегментов памяти.\n");
     printf("mem_id = %d\n", mem_id);
     errno = 0;
-    struct server_param *serverparam = (struct server_param*) shmat(mem_id, NULL, SHM_RDONLY);
+    struct server_param *serverparam = (struct server_param *) shmat(mem_id, NULL, SHM_RDONLY);
     if (errno) {
         fprintf(stderr, "Невозможно получить доступ к указаной памяти.\n");
         exit(1);
     }
     printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", serverparam->work_time,
            serverparam->loadavg[0], serverparam->loadavg[1], serverparam->loadavg[2]);
+}
+
+void get_param_mmap_file(char *filename) {
+    errno = 0;
+    int file = open(filename, O_RDONLY);
+    if (errno) {
+        fprintf(stderr, "Невозможно открыть файл.\n");
+        exit(1);
+    }
+    struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_WRITE,
+                                                                     MAP_SHARED, file, 0);
+    // TODO: не робит
+    if (errno) {
+        fprintf(stderr, "Невозможно отобразить файл.\n");
+        exit(1);
+    }
+    printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", server_param->work_time,
+           server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
 }
 
 void get_param(int argc, char *argv[]) {
@@ -32,7 +52,8 @@ void get_param(int argc, char *argv[]) {
         printf("mem_id = %d\n", mem_id);
     } else if (flag & MMAP_FILE) {
         printf("Клиент-серверное взаимодействие осуществляется при помощи файла, отображённого в память с использованием mmap.\n");
-        printf("filename = %s", filename);
+        printf("filename = %s\n", filename);
+        get_param_mmap_file(filename);
     }
 }
 
