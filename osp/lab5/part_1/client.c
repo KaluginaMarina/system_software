@@ -15,7 +15,7 @@ void get_param_shared_memory(int mem_id) {
     errno = 0;
     struct server_param *serverparam = (struct server_param *) shmat(mem_id, NULL, SHM_RDONLY);
     if (errno) {
-        fprintf(stderr, "Невозможно получить доступ к указаной памяти.\n");
+        fprintf(stderr, "Невозможно получить доступ к указаной памяти. Errno = %s\n", strerror(errno));
         exit(1);
     }
     printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", serverparam->work_time,
@@ -26,14 +26,14 @@ void get_param_mmap_file(char *filename) {
     errno = 0;
     int file = open(filename, O_RDONLY);
     if (errno) {
-        fprintf(stderr, "Невозможно открыть файл.\n");
+        fprintf(stderr, "Невозможно открыть файл. Errno = %s\n", strerror(errno));
         exit(1);
     }
     struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_WRITE,
                                                                      MAP_SHARED, file, 0);
     // TODO: не робит
     if (errno) {
-        fprintf(stderr, "Невозможно отобразить файл.\n");
+        fprintf(stderr, "Невозможно отобразить файл. Errno = %s\n", strerror(errno));
         exit(1);
     }
     printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", server_param->work_time,
@@ -74,7 +74,7 @@ unsigned int parse_flag_cl(int argc, char *argv[], int *mem_id, char *filename) 
                 }
                 errno = 0;
                 *mem_id = (int) strtol(argv[optind], &p, 10);
-                if (errno != 0 || *mem_id <= 0) {
+                if (errno != 0 || *mem_id < 0) {
                     fprintf(stderr, "Указан неверный mem_id.\n");
                     exit(1);
                 }
@@ -91,7 +91,7 @@ unsigned int parse_flag_cl(int argc, char *argv[], int *mem_id, char *filename) 
                 }
                 errno = 0;
                 *mem_id = (int) strtol(argv[optind], &p, 10);
-                if (errno != 0 || *mem_id <= 0) {
+                if (errno != 0 || *mem_id < 0) {
                     fprintf(stderr, "Указан неверный mem_id.\n");
                     exit(1);
                 }

@@ -34,7 +34,7 @@ struct server_param *shared_memory_param() {
     }
 
     if (EACCES == errno) {
-        fprintf(stderr, "Permission denied\n");
+        fprintf(stderr, "Permission denied. Errno = %s\n", strerror(errno));
         exit(1);
     }
 
@@ -51,7 +51,7 @@ struct server_param *message_queue_param(int *mem_id) {
     // TODO: починииь это
     *mem_id = msgget(IPC_PRIVATE, IPC_CREAT | PERM);
     if (errno) {
-        fprintf(stderr, "Невозможно создать очередь сообщений.\n");
+        fprintf(stderr, "Невозможно создать очередь сообщений. Errno = %s\n", strerror(errno));
         exit(1);
     }
 
@@ -69,15 +69,15 @@ struct server_param *mmap_file(char *filename) {
     errno = 0;
     int file = open(filename, O_CREAT | O_RDWR, PERM);
     if (errno == EACCES) {
-        fprintf(stderr, "Нет прав на запись в данный файл/компонент пути.\n");
+        fprintf(stderr, "Нет прав на запись в данный файл/компонент пути. Errno = %s\n", strerror(errno));
         exit(1);
     } else if (errno) {
-        fprintf(stderr, "Невозможно создать/открыть файл.\n");
+        fprintf(stderr, "Невозможно создать/открыть файл. Errno = %s\n", strerror(errno));
         exit(1);
     }
     ftruncate(file, sizeof(struct server_param));
     if (errno) {
-        fprintf(stderr, "Невозможно открыть файл.\n");
+        fprintf(stderr, "Невозможно открыть файл. Errno = %s\n", strerror(errno));
         exit(1);
     }
     struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_WRITE,
@@ -113,7 +113,7 @@ void start_server(int argc, char *argv[]) {
             errno = 0;
             msgrcv(mem_id, &msg, 0, 1, 0); // mstype == 1 => type query
             if (errno) {
-                fprintf(stderr, "Невозможно создать сообщение.\n");
+                fprintf(stderr, "Невозможно создать сообщение. Errno = %s\n", strerror(errno));
                 exit(1);
             }
             msg.mtype = 2; // reply
