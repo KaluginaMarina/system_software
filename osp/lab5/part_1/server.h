@@ -1,7 +1,7 @@
 #ifndef PART_1_SERVER_SERVER_H
 #define PART_1_SERVER_SERVER_H
 
-#include <bits/types/time_t.h>
+#include <time.h>
 
 /**
  * Флаги обмена клиента с сервером
@@ -35,7 +35,7 @@ struct server_param {
     double loadavg[3]; // загрузка системы за последние 1, 5, 15 минут
 };
 
-struct msgbuf {
+struct msgbuff {
     long mtype;
     char mtext[sizeof(struct server_param)];
 };

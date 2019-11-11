@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <time.h>
 #include <zconf.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -10,6 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <time.h>
 #include "server.h"
 
 void set_ids(struct server_param *server_param) {
@@ -48,7 +48,6 @@ struct server_param *shared_memory_param() {
 
 struct server_param *message_queue_param(int *mem_id) {
     errno = 0;
-    // TODO: починииь это
     *mem_id = msgget(IPC_PRIVATE, IPC_CREAT | PERM);
     if (errno) {
         fprintf(stderr, "Невозможно создать очередь сообщений. Errno = %s\n", strerror(errno));
@@ -109,7 +108,7 @@ void start_server(int argc, char *argv[]) {
         sleep(1);
         set_param(server_param);
         if (flag & MESSAGE_QUEUE) {
-            struct msgbuf msg;
+            struct msgbuff msg;
             errno = 0;
             msgrcv(mem_id, &msg, 0, 1, 0); // mstype == 1 => type query
             if (errno) {
