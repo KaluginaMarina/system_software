@@ -14,11 +14,18 @@ char array[SIZE];
 void print_array();
 
 /**
- *
- * @param argc
- * @param argv
+ * Функция для разбора ключей
+ * @param argc - аргументы командной строки
+ * @param argv - аргументы командной строки
  * @return
  */
-unsigned int parse_flag(int argc, char *argv[]);
+void parse_flag(int argc, char *argv[]);
+
+/**
+ * Функция для запуска: заполняет массив, вызывает функцию для начала работы
+ * @param argc - аргументы командной строки
+ * @param argv - аргументы командной строки
+ */
+void start(int argc, char *argv[]);
 
 #endif //PART_2_THREADS_H

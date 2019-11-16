@@ -9,8 +9,8 @@ void print_array() {
     }
 }
 
-unsigned int parse_flag(int argc, char *argv[]) {
-    unsigned int flag = 0, opt = 0;
+void parse_flag(int argc, char *argv[]) {
+    unsigned int opt = 0;
     if (argc > 2) {
         fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3|-4\n");
         exit(1);
@@ -39,5 +39,11 @@ unsigned int parse_flag(int argc, char *argv[]) {
                 exit(1);
         }
     }
-    return flag;
+}
+
+void start(int argc, char *argv[]) {
+    for (int i = 0; i < SIZE; ++i) {
+        array[i] = i + 'a';
+    }
+    parse_flag(argc, argv);
 }
