@@ -19,7 +19,7 @@
 #define PERM 0644
 
 /**
- *
+ * для message queue
  */
 #define MSGTYPE_QUERY 1
 #define MSGTYPE_REPLY 2
@@ -41,6 +41,9 @@ struct server_param {
     double loadavg[3]; // загрузка системы за последние 1, 5, 15 минут
 };
 
+/**
+* структура описания сообщения в message queue
+*/
 struct msgbuff {
     long mtype;
     char mtext[sizeof(struct server_param)];
