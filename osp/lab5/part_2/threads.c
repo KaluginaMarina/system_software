@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include "threads.h"
 
-int main() {
+void print_array() {
     for (int i = 0; i < SIZE; ++i) {
-        array[i] = i + 'a';
+        printf("%c ", array[i]);
     }
-
-    print_array();
-    return 0;
 }
