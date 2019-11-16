@@ -13,5 +13,12 @@ char array[SIZE];
  */
 void print_array();
 
+/**
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
+unsigned int parse_flag(int argc, char *argv[]);
 
 #endif //PART_2_THREADS_H

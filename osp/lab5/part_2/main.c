@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include "threads.h"
 
-int main() {
+int main(int argc, char *argv[]) {
     for (int i = 0; i < SIZE; ++i) {
         array[i] = i + 'a';
     }
 
-    print_array();
+    parse_flag(argc, argv);
     return 0;
 }
