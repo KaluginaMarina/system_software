@@ -19,6 +19,12 @@
 #define PERM 0644
 
 /**
+ *
+ */
+#define MSGTYPE_QUERY 1
+#define MSGTYPE_REPLY 2
+
+/**
  * флаг
  */
 unsigned int flag;
@@ -73,9 +79,10 @@ struct server_param* shared_memory_param();
 /**
  * Функция для хранения требуемой информации и обмена информацией между клиентом и сервером
  * при помощи System V message queue
+ * @param mem_id -- указатель на записть номера
  * @return указатель на структуру
  */
-struct server_param* message_queue_param();
+struct server_param* message_queue_param(int *mem_id);
 
 /**
  * Функция для обмена информации при помощи файла, отображённого в память с использованием mmap

@@ -110,12 +110,12 @@ void start_server(int argc, char *argv[]) {
         if (flag & MESSAGE_QUEUE) {
             struct msgbuff msg;
             errno = 0;
-            msgrcv(mem_id, &msg, 0, 1, 0); // mstype == 1 => type query
+            msgrcv(mem_id, &msg, 0, MSGTYPE_QUERY, 0);
             if (errno) {
                 fprintf(stderr, "Невозможно создать сообщение. Errno = %s\n", strerror(errno));
                 exit(1);
             }
-            msg.mtype = 2; // reply
+            msg.mtype = MSGTYPE_REPLY;
             memcpy(msg.mtext, server_param, sizeof(struct server_param));
             msgsnd(mem_id, &msg, sizeof(struct server_param), 0);
         }

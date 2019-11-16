@@ -32,4 +32,10 @@ void get_param_shared_memory(int mem_id);
  * @param filename -- имя файла
  */
 void get_param_mmap_file(char* filename);
+
+/**
+ * Функция для получения информации от сервера с использованием message queue
+ * @param mem_id -- значение очереди
+ */
+void get_param_message_queue_param(int mem_id);
 #endif //PART_1_CLIENT_H

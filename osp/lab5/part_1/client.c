@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <sys/shm.h>
 #include <string.h>
+#include <sys/msg.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include "server.h"
@@ -22,6 +23,27 @@ void get_param_shared_memory(int mem_id) {
            serverparam->loadavg[0], serverparam->loadavg[1], serverparam->loadavg[2]);
 }
 
+
+void get_param_message_queue_param(int mem_id) {
+    errno = 0;
+    struct msgbuff msgbuff;
+    msgbuff.mtype = MSGTYPE_QUERY;
+    msgsnd(mem_id, &msgbuff, 0, 0);
+    if (errno) {
+        fprintf(stderr, "Невозможно отправить запрос для получение информации в очереди. Ошибка: %s", strerror(errno));
+        exit(1);
+    }
+
+    msgrcv(mem_id, &msgbuff, sizeof(struct server_param), MSGTYPE_REPLY, 0);
+    if (errno) {
+        fprintf(stderr, "Невозможно получить сообщение. Ошибка: %s", strerror(errno));
+        exit(1);
+    }
+    struct server_param *server_param = (struct server_param*) malloc(sizeof(struct server_param));
+    printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", server_param->work_time,
+           server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
+}
+
 void get_param_mmap_file(char *filename) {
     errno = 0;
     int file = open(filename, O_RDONLY);
@@ -38,6 +60,7 @@ void get_param_mmap_file(char *filename) {
     }
     printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", server_param->work_time,
            server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
+    close(file);
 }
 
 void get_param(int argc, char *argv[]) {
@@ -50,6 +73,7 @@ void get_param(int argc, char *argv[]) {
     } else if (flag & MESSAGE_QUEUE) {
         printf("Клиент-серверное взаимодействие осуществляется при помощи System V message queue.\n");
         printf("mem_id = %d\n", mem_id);
+        get_param_message_queue_param(mem_id);
     } else if (flag & MMAP_FILE) {
         printf("Клиент-серверное взаимодействие осуществляется при помощи файла, отображённого в память с использованием mmap.\n");
         printf("filename = %s\n", filename);
