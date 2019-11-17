@@ -7,6 +7,7 @@ void print_array() {
     for (int i = 0; i < SIZE; ++i) {
         printf("%c ", array[i]);
     }
+    printf("\n");
 }
 
 void parse_flag(int argc, char *argv[]) {
@@ -24,6 +25,7 @@ void parse_flag(int argc, char *argv[]) {
         switch (opt) {
             case '1':
                 printf("Первое подзадание.\n");
+                first_task();
                 break;
             case '2':
                 printf("Второе подзадание.\n");
@@ -46,4 +48,26 @@ void start(int argc, char *argv[]) {
         array[i] = i + 'a';
     }
     parse_flag(argc, argv);
+}
+
+void first_task() {
+    
+}
+
+void change_reg() {
+    for (int i = 0; i < SIZE; ++i) {
+        if (array[i] >= 'A' && array[i] <= 'Z') {
+            array[i] = array[i] - 'A' + 'a';
+        } else {
+            array[i] = array[i] - 'a' + 'A';
+        }
+    }
+}
+
+void reverse() {
+    for (int i = 0; i < SIZE / 2; ++i) {
+        char tmp = array[i];
+        array[i] = array[SIZE - i - 1];
+        array[SIZE - i - 1] = tmp;
+    }
 }
