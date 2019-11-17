@@ -6,7 +6,7 @@
 /**
  * Данный массив
  */
-char array[SIZE];
+volatile char array[SIZE];
 
 /**
  * вывод массива в stdin
@@ -39,10 +39,10 @@ void first_task();
 /**
  * Функция для смены регистра
  */
-void change_reg();
+void *change_reg();
 
 /**
  * Функция, которая разворачивает массив
  */
-void reverse();
+void *reverse();
 #endif //PART_2_THREADS_H

@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <stdbool.h>
+#include <pthread.h>
+#include <errno.h>
+#include <sys/sem.h>
+#include <string.h>
+#include <zconf.h>
+#include <semaphore.h>
 #include "threads.h"
 
 void print_array() {
@@ -50,24 +57,53 @@ void start(int argc, char *argv[]) {
     parse_flag(argc, argv);
 }
 
+sem_t sem;
 void first_task() {
-    
+    pthread_t thread1;
+    pthread_t thread2;
+    errno = 0;
+    sem_init(&sem, 0, 1);
+    if (errno) {
+        fprintf(stderr, "Невозможно сделать sem_init. Ошибка: %s\n", strerror(errno));
+        exit(1);
+    }
+    pthread_create(&thread1, NULL, change_reg, NULL);
+    pthread_create(&thread2, NULL, reverse, NULL);
+    if (errno) {
+        fprintf(stderr, "Не удалось создать потоки. Ошибка: %s\n", strerror(errno));
+        exit(1);
+    }
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
 }
 
-void change_reg() {
-    for (int i = 0; i < SIZE; ++i) {
-        if (array[i] >= 'A' && array[i] <= 'Z') {
-            array[i] = array[i] - 'A' + 'a';
-        } else {
-            array[i] = array[i] - 'a' + 'A';
+void *change_reg() {
+    while (true) {
+        sem_wait(&sem);
+        for (int i = 0; i < SIZE; ++i) {
+            if (array[i] >= 'A' && array[i] <= 'Z') {
+                array[i] = array[i] - 'A' + 'a';
+            } else {
+                array[i] = array[i] - 'a' + 'A';
+            }
         }
+        print_array();
+        sem_post(&sem);
+        sleep(1);
     }
 }
 
-void reverse() {
-    for (int i = 0; i < SIZE / 2; ++i) {
-        char tmp = array[i];
-        array[i] = array[SIZE - i - 1];
-        array[SIZE - i - 1] = tmp;
+void *reverse() {
+    while (true) {
+        sem_wait(&sem);
+        for (int i = 0; i < SIZE / 2; ++i) {
+            char tmp = array[i];
+            array[i] = array[SIZE - i - 1];
+            array[SIZE - i - 1] = tmp;
+        }
+        print_array();
+        sem_post(&sem);
+        sleep(1);
     }
 }
