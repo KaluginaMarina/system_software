@@ -3,6 +3,5 @@
 
 int main(int argc, char *argv[]) {
     start(argc, argv);
-    print_array();
     return 0;
 }
