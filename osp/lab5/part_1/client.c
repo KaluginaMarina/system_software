@@ -47,12 +47,12 @@ void get_param_message_queue_param(int mem_id) {
 
 void get_param_mmap_file(char *filename) {
     errno = 0;
-    int file = open(filename, O_RDONLY);
+    int file = open(filename, O_RDONLY, NULL);
     if (errno) {
         fprintf(stderr, "Невозможно открыть файл. Ошибка: %s\n", strerror(errno));
         exit(1);
     }
-    struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_WRITE,
+    struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_READ,
                                                                      MAP_SHARED, file, 0);
     // TODO: не робит
     if (errno) {
