@@ -79,7 +79,9 @@ void first_task() {
 
 void *change_reg() {
     while (true) {
+        usleep(500000);
         sem_wait(&sem);
+        usleep(500000);
         for (int i = 0; i < SIZE; ++i) {
             if (array[i] >= 'A' && array[i] <= 'Z') {
                 array[i] = array[i] - 'A' + 'a';
@@ -88,21 +90,25 @@ void *change_reg() {
             }
         }
         print_array();
+        usleep(500000);
         sem_post(&sem);
-        sleep(1);
+        usleep(500000);
     }
 }
 
 void *reverse() {
     while (true) {
+        usleep(500000);
         sem_wait(&sem);
+        usleep(500000);
         for (int i = 0; i < SIZE / 2; ++i) {
             char tmp = array[i];
             array[i] = array[SIZE - i - 1];
             array[SIZE - i - 1] = tmp;
         }
         print_array();
+        usleep(500000);
         sem_post(&sem);
-        sleep(1);
+        usleep(500000);
     }
 }
