@@ -66,8 +66,8 @@ void first_task() {
         fprintf(stderr, "Невозможно сделать sem_init. Ошибка: %s\n", strerror(errno));
         exit(1);
     }
-    pthread_create(&thread1, NULL, change_reg, NULL);
-    pthread_create(&thread2, NULL, reverse, NULL);
+    pthread_create(&thread1, NULL, task1_thread1, NULL);
+    pthread_create(&thread2, NULL, task1_thread2, NULL);
     if (errno) {
         fprintf(stderr, "Не удалось создать потоки. Ошибка: %s\n", strerror(errno));
         exit(1);
@@ -77,36 +77,44 @@ void first_task() {
     pthread_join(thread2, NULL);
 }
 
-void *change_reg() {
+void change_reg(){
+    for (int i = 0; i < SIZE; ++i) {
+        if (array[i] >= 'A' && array[i] <= 'Z') {
+            array[i] = array[i] - 'A' + 'a';
+        } else {
+            array[i] = array[i] - 'a' + 'A';
+        }
+    }
+    print_array();
+}
+
+void reverse(){
+    for (int i = 0; i < SIZE / 2; ++i) {
+        char tmp = array[i];
+        array[i] = array[SIZE - i - 1];
+        array[SIZE - i - 1] = tmp;
+    }
+    print_array();
+}
+
+void *task1_thread1() {
     while (true) {
         usleep(500000);
         sem_wait(&sem);
         usleep(500000);
-        for (int i = 0; i < SIZE; ++i) {
-            if (array[i] >= 'A' && array[i] <= 'Z') {
-                array[i] = array[i] - 'A' + 'a';
-            } else {
-                array[i] = array[i] - 'a' + 'A';
-            }
-        }
-        print_array();
+        change_reg();
         usleep(500000);
         sem_post(&sem);
         usleep(500000);
     }
 }
 
-void *reverse() {
+void *task1_thread2() {
     while (true) {
         usleep(500000);
         sem_wait(&sem);
         usleep(500000);
-        for (int i = 0; i < SIZE / 2; ++i) {
-            char tmp = array[i];
-            array[i] = array[SIZE - i - 1];
-            array[SIZE - i - 1] = tmp;
-        }
-        print_array();
+        reverse();
         usleep(500000);
         sem_post(&sem);
         usleep(500000);

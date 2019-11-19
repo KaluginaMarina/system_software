@@ -39,10 +39,21 @@ void first_task();
 /**
  * Функция для смены регистра
  */
-void *change_reg();
+void change_reg();
 
 /**
  * Функция, которая разворачивает массив
  */
-void *reverse();
+void reverse();
+
+/**
+ * поток 1 для 4 подзадания
+ */
+void *task1_thread1();
+
+
+/**
+ * поток 1 для 4 подзадания
+ */
+void *task1_thread2();
 #endif //PART_2_THREADS_H
