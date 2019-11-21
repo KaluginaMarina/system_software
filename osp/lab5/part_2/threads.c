@@ -10,8 +10,13 @@
 #include <sys/sem.h>
 #include <sys/ipc.h>
 #include "threads.h"
+
 // [главный поток, смена регистра, реверс, счетчик]
 unsigned long time_threads[4] = {1000000, 1000000, 1000000, 1000000};
+const char *format = "./threads -1\n"
+                     "\t./threads -2\n"
+                     "\t./threads -3 [TIME | TIME_MAIN TIME1 TIME2]\n"
+                     "\t./threads -4 [TIME | TIME_MAIN TIME1 TIME2 TIME3]";
 
 void check_errno(char *strerr) {
     if (errno) {
@@ -31,14 +36,14 @@ void parse_flag(int argc, char *argv[]) {
     unsigned int opt = 0;
     if (argc == 1) {
         fprintf(stderr,
-                "Не указан номер подзадания.\nИспользуйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4.\n");
+                "Не указан номер подзадания.\nИспользуйте: \n\t.%s.\n", format);
         exit(1);
     }
     while ((opt = getopt(argc, argv, "1234")) != -1) {
         switch (opt) {
             case '1':
                 if (argc > 2) {
-                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t%s\n", format);
                     exit(1);
                 }
                 printf("Первое подзадание.\n");
@@ -46,7 +51,7 @@ void parse_flag(int argc, char *argv[]) {
                 break;
             case '2':
                 if (argc > 2) {
-                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t%s\n", format);
                     exit(1);
                 }
                 printf("Второе подзадание.\n");
@@ -56,43 +61,68 @@ void parse_flag(int argc, char *argv[]) {
                 errno = 0;
                 printf("Третье подзадание.\n");
                 if (argc == optind) {
-                    printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n", time_threads[0]);
-                } else if (optind + 1 == argc){
+                    printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n",
+                           time_threads[0]);
+                } else if (optind + 1 == argc) {
                     char *p;
                     u_long tmp = (unsigned long) strtol(argv[optind], &p, 10);
                     if (errno || *p != '\0' || time < 0) {
-                        fprintf(stderr, "Встречен неверный формат. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                        fprintf(stderr, "Встречен неверный формат. Используйте: \n\t%s\n", format);
                         exit(1);
                     }
                     for (int i = 0; i < 3; ++i) {
                         time_threads[i] = tmp;
                     }
-                } else if (optind + 3 == argc){
+                } else if (optind + 3 == argc) {
                     char *p;
                     for (int i = 0; i < 3; ++i) {
                         time_threads[i] = (unsigned long) strtol(argv[optind++], &p, 10);
                         if (errno || *p != '\0' || time < 0) {
                             fprintf(stderr,
-                                    "Встречен неверный формат. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                                    "Встречен неверный формат. Используйте: \n\t%s\n", format);
                             exit(1);
                         }
                     }
                 } else {
                     fprintf(stderr,
-                            "Встречен неверный формат. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                            "Встречен неверный формат. Используйте: \n\t%s\n", format);
                     exit(1);
                 }
                 third_task();
                 break;
             case '4':
-                if (argc > 2) {
-                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                printf("Четвертое подзадание:\n");
+                if (argc == optind) {
+                    printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n",
+                           time_threads[0]);
+                } else if (optind + 1 == argc) {
+                    char *p;
+                    u_long tmp = (unsigned long) strtol(argv[optind], &p, 10);
+                    if (errno || *p != '\0' || time < 0) {
+                        fprintf(stderr, "Встречен неверный формат. Используйте: \n\t%s\n", format);
+                        exit(1);
+                    }
+                    for (int i = 0; i < 4; ++i) {
+                        time_threads[i] = tmp;
+                    }
+                } else if (optind + 4 == argc) {
+                    char *p;
+                    for (int i = 0; i < 4; ++i) {
+                        time_threads[i] = (unsigned long) strtol(argv[optind++], &p, 10);
+                        if (errno || *p != '\0' || time < 0) {
+                            fprintf(stderr,
+                                    "Встречен неверный формат. Используйте: \n\t%s\n", format);
+                            exit(1);
+                        }
+                    }
+                } else {
+                    fprintf(stderr,
+                            "Встречен неверный формат. Используйте: \n\t.%s\n", format);
                     exit(1);
                 }
-                printf("Четвертое подзадание:\n");
                 break;
             default:
-                fprintf(stderr, "Неверный ключ. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4.\n");
+                fprintf(stderr, "Неверный ключ. Используйте: \n\t%s\n", format);
                 exit(1);
         }
     }
@@ -145,7 +175,7 @@ void second_task() {
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void third_task(){
+void third_task() {
     errno = 0;
     pthread_t thread1, thread2;
     pthread_mutex_init(&mutex, NULL);
