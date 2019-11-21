@@ -10,6 +10,8 @@
 #include <sys/sem.h>
 #include <sys/ipc.h>
 #include "threads.h"
+// [главный поток, смена регистра, реверс, счетчик]
+unsigned long time_threads[4] = {1000000, 1000000, 1000000, 1000000};
 
 void check_errno(char *strerr) {
     if (errno) {
@@ -25,19 +27,18 @@ void print_array() {
     printf("\n");
 }
 
-unsigned long time_threads = 1000000;
 void parse_flag(int argc, char *argv[]) {
     unsigned int opt = 0;
     if (argc == 1) {
         fprintf(stderr,
-                "Не указан номер подзадания.\nИспользуйте: \n\t./threads -1|-2|-3 [TIME]|-4.\n");
+                "Не указан номер подзадания.\nИспользуйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4.\n");
         exit(1);
     }
     while ((opt = getopt(argc, argv, "1234")) != -1) {
         switch (opt) {
             case '1':
                 if (argc > 2) {
-                    fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
                     exit(1);
                 }
                 printf("Первое подзадание.\n");
@@ -45,36 +46,53 @@ void parse_flag(int argc, char *argv[]) {
                 break;
             case '2':
                 if (argc > 2) {
-                    fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
                     exit(1);
                 }
                 printf("Второе подзадание.\n");
                 second_task();
                 break;
             case '3':
+                errno = 0;
                 printf("Третье подзадание.\n");
                 if (argc == optind) {
-                    printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n", time_threads);
-                } else {
+                    printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n", time_threads[0]);
+                } else if (optind + 1 == argc){
                     char *p;
-                    errno = 0;
-                    time_threads = (unsigned long) strtol(argv[optind], &p, 10);
+                    u_long tmp = (unsigned long) strtol(argv[optind], &p, 10);
                     if (errno || *p != '\0' || time < 0) {
-                        fprintf(stderr, "Встречен неверный формат. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                        fprintf(stderr, "Встречен неверный формат. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
                         exit(1);
                     }
+                    for (int i = 0; i < 3; ++i) {
+                        time_threads[i] = tmp;
+                    }
+                } else if (optind + 3 == argc){
+                    char *p;
+                    for (int i = 0; i < 3; ++i) {
+                        time_threads[i] = (unsigned long) strtol(argv[optind++], &p, 10);
+                        if (errno || *p != '\0' || time < 0) {
+                            fprintf(stderr,
+                                    "Встречен неверный формат. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                            exit(1);
+                        }
+                    }
+                } else {
+                    fprintf(stderr,
+                            "Встречен неверный формат. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
+                    exit(1);
                 }
                 third_task();
                 break;
             case '4':
                 if (argc > 2) {
-                    fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4\n");
                     exit(1);
                 }
                 printf("Четвертое подзадание:\n");
                 break;
             default:
-                fprintf(stderr, "Неверный ключ. Используйте: \n\t./threads -1|-2|-3 [TIME]|-4.\n");
+                fprintf(stderr, "Неверный ключ. Используйте: \n\t./threads -1|-2|-3 [TIME | TIME1 TIME2 TIME3]|-4.\n");
                 exit(1);
         }
     }
@@ -143,7 +161,7 @@ void third_task(){
         print_array();
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно выполнить pthread_mutex_lock");
-        usleep(time_threads);
+        usleep(time_threads[0]);
     }
 }
 
@@ -163,6 +181,16 @@ void reverse() {
         array[i] = array[SIZE - i - 1];
         array[SIZE - i - 1] = tmp;
     }
+}
+
+u_short count_letters() {
+    int res = 0;
+    for (int i = 0; i < SIZE; ++i) {
+        if (array[i] >= 'A' && array[i] <= 'Z') {
+            res++;
+        }
+    }
+    return res;
 }
 
 void *task1_thread1() {
@@ -229,7 +257,7 @@ void *task3_thread1() {
         change_reg();
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно разблокировать ресурс (в функции pthread_mutex_unlock)");
-        usleep(time_threads);
+        usleep(time_threads[1]);
     }
 }
 
@@ -240,6 +268,6 @@ void *task3_thread2() {
         reverse();
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно заблокировать ресурс (pthread_mutex_lock)");
-        usleep(time_threads);
+        usleep(time_threads[2]);
     }
 }

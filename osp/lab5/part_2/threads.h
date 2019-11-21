@@ -65,6 +65,12 @@ void change_reg();
 void reverse();
 
 /**
+ * функция считает количество заглавных символов
+ * @return количество заглавных символов
+ */
+unsigned short count_letters();
+
+/**
  * Функция проверки errno
  * @param strerr - строка, выводящаяся в случае ошибки
  */
