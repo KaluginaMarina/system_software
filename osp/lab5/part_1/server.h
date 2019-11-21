@@ -99,4 +99,10 @@ struct server_param* mmap_file(char* filename);
  * @param server_param -- указатель на структуру server_param
  */
 void set_ids(struct server_param *server_param);
+
+/**
+ * Функция проверки errno
+ * @param strerr - строка, выводящаяся в случае ошибки
+ */
+void check_errno(char* strerr);
 #endif //PART_1_SERVER_SERVER_H

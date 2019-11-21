@@ -12,6 +12,13 @@
 #include <time.h>
 #include "server.h"
 
+void check_errno(char *strerr) {
+    if (errno) {
+        fprintf(stderr, "%s. Ошибка: %s\n", strerr, strerror(errno));
+        exit(1);
+    }
+}
+
 void set_ids(struct server_param *server_param) {
     time(&server_param->start_time);
     server_param->pid = getpid();
@@ -33,10 +40,7 @@ struct server_param *shared_memory_param() {
         exit(1);
     }
 
-    if (EACCES == errno) {
-        fprintf(stderr, "Permission denied. Ошибка: %s\n", strerror(errno));
-        exit(1);
-    }
+    check_errno("Невозможно создать разделяемый сегмент памяти");
 
     set_ids(server_param);
 
@@ -49,10 +53,8 @@ struct server_param *shared_memory_param() {
 struct server_param *message_queue_param(int *mem_id) {
     errno = 0;
     *mem_id = msgget(IPC_PRIVATE, IPC_CREAT | PERM);
-    if (errno) {
-        fprintf(stderr, "Невозможно создать очередь сообщений. Ошибка: %s\n", strerror(errno));
-        exit(1);
-    }
+
+    check_errno("Невозможно создать очередь сообщений");
 
     struct server_param *server_param = malloc(sizeof(struct server_param));
 
@@ -67,24 +69,15 @@ struct server_param *message_queue_param(int *mem_id) {
 struct server_param *mmap_file(char *filename) {
     errno = 0;
     int file = open(filename, O_CREAT | O_RDWR, PERM);
-    if (errno == EACCES) {
-        fprintf(stderr, "Нет прав на запись в данный файл/компонент пути. Ошибка: %s\n", strerror(errno));
-        exit(1);
-    } else if (errno) {
-        fprintf(stderr, "Невозможно создать/открыть файл. Ошибка: %s\n", strerror(errno));
-        exit(1);
-    }
+    check_errno("Невозможно создать/открыть файл");
+
     ftruncate(file, sizeof(struct server_param));
-    if (errno) {
-        fprintf(stderr, "Невозможно открыть файл. Ошибка: %s\n", strerror(errno));
-        exit(1);
-    }
+    check_errno("Невозможно открыть файл");
+
     struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_WRITE,
                                                                      MAP_SHARED, file, 0);
-    if (errno) {
-        fprintf(stderr, "Невозможно отобразить файл.\n");
-        exit(1);
-    }
+    check_errno("Невозможно отобразить файл");
+
     set_ids(server_param);
     printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
            server_param->gid);
@@ -111,17 +104,12 @@ void start_server(int argc, char *argv[]) {
             struct msgbuff msg;
             errno = 0;
             msgrcv(mem_id, &msg, 0, MSGTYPE_QUERY, 0);
-            if (errno) {
-                fprintf(stderr, "Невозможно создать сообщение. Ошибка: %s\n", strerror(errno));
-                exit(1);
-            }
+            check_errno("Невозможно создать сообщение");
+
             msg.mtype = MSGTYPE_REPLY;
             memcpy(msg.mtext, server_param, sizeof(struct server_param));
             msgsnd(mem_id, &msg, sizeof(struct server_param), 0);
-            if (errno) {
-                fprintf(stderr, "Невозможно записать сообщение. Ошибка: %s", strerror(errno));
-                exit(1);
-            }
+            check_errno("Невозможно записать сообщение");
         }
         printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time,
                server_param->loadavg[0],
