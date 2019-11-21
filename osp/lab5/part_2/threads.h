@@ -4,7 +4,6 @@
 #define SIZE 26
 #define PERM 0644
 
-
 /**
  * Данный массив
  */

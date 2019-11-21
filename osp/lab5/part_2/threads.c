@@ -20,33 +20,55 @@ void print_array() {
 
 void parse_flag(int argc, char *argv[]) {
     unsigned int opt = 0;
-    if (argc > 2) {
-        fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3|-4\n");
-        exit(1);
-    }
     if (argc == 1) {
         fprintf(stderr,
-                "Не указан номер подзадания.\nИспользуйте: \n\t./threads -1|-2|-3|-4.\n");
+                "Не указан номер подзадания.\nИспользуйте: \n\t./threads -1|-2|-3 [TIME]|-4.\n");
         exit(1);
     }
     while ((opt = getopt(argc, argv, "1234")) != -1) {
         switch (opt) {
             case '1':
+                if (argc > 2) {
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                    exit(1);
+                }
                 printf("Первое подзадание.\n");
                 first_task();
                 break;
             case '2':
+                if (argc > 2) {
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                    exit(1);
+                }
                 printf("Второе подзадание.\n");
                 second_task();
                 break;
             case '3':
                 printf("Третье подзадание.\n");
+                time_t time;
+                if (argc == optind) {
+                    time = 1000000;
+                    printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n", time);
+                } else {
+                    char *p;
+                    errno = 0;
+                    time = (int) strtol(argv[optind], &p, 10);
+                    if (errno || *p != '\0' || time < 0) {
+                        fprintf(stderr, "Встречен неверный формат. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                        exit(1);
+                    }
+                }
+                printf("%ld", time);
                 break;
             case '4':
+                if (argc > 2) {
+                    fprintf(stderr, "Встречено несколько флагов. Используйте: ./threads -1|-2|-3 [TIME]|-4\n");
+                    exit(1);
+                }
                 printf("Четвертое подзадание:\n");
                 break;
             default:
-                fprintf(stderr, "Неверный ключ. Используйте: \n\t./threads -1|-2|-3|-4.\n");
+                fprintf(stderr, "Неверный ключ. Используйте: \n\t./threads -1|-2|-3 [TIME]|-4.\n");
                 exit(1);
         }
     }
