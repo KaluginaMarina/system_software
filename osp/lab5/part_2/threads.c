@@ -129,42 +129,38 @@ void reverse() {
 
 void *task1_thread1() {
     while (true) {
-        usleep(500000);
         errno = 0;
         sem_wait(&sem);
         if (errno) {
             fprintf(stderr, "Невозможно выполнить sem_wait. Ошибка: %s", strerror(errno));
             exit(1);
         }
-        usleep(500000);
         change_reg();
-        usleep(500000);
+        sleep(1);
         sem_post(&sem);
         if (errno) {
             fprintf(stderr, "Невозможно выполнить sem_post. Ошибка: %s", strerror(errno));
             exit(1);
         }
-        usleep(500000);
+        sleep(1);
     }
 }
 
 void *task1_thread2() {
     while (true) {
-        usleep(500000);
         sem_wait(&sem);
         if (errno) {
             fprintf(stderr, "Невозможно выполнить sem_wait. Ошибка: %s", strerror(errno));
             exit(1);
         }
-        usleep(500000);
         reverse();
-        usleep(500000);
+        sleep(1);
         sem_post(&sem);
         if (errno) {
             fprintf(stderr, "Невозможно выполнить sem_post. Ошибка: %s", strerror(errno));
             exit(1);
         }
-        usleep(500000);
+        sleep(1);
     }
 }
 
