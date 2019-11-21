@@ -140,8 +140,7 @@ void third_task(){
     while (true) {
         pthread_mutex_lock(&mutex);
         check_errno("Невозможно выполнить pthread_mutex_lock");
-        printf("что-то написано\n");
-        usleep(time_threads);
+        print_array();
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно выполнить pthread_mutex_lock");
         usleep(time_threads);
@@ -156,7 +155,6 @@ void change_reg() {
             array[i] = array[i] - 'a' + 'A';
         }
     }
-    print_array();
 }
 
 void reverse() {
@@ -165,7 +163,6 @@ void reverse() {
         array[i] = array[SIZE - i - 1];
         array[SIZE - i - 1] = tmp;
     }
-    print_array();
 }
 
 void *task1_thread1() {
@@ -174,6 +171,7 @@ void *task1_thread1() {
         sem_wait(&sem);
         check_errno("Невозможно заблокировать ресурс (in sem_wait)");
         change_reg();
+        print_array();
         sleep(1);
         sem_post(&sem);
         check_errno("Невозможно разблокировать ресурс (in sem_post)");
@@ -186,6 +184,7 @@ void *task1_thread2() {
         sem_wait(&sem);
         check_errno("Невозможно заблокировать ресурс (in sem_wait)");
         reverse();
+        print_array();
         sleep(1);
         sem_post(&sem);
         check_errno("Невозможно заблокировать ресурс (in sem_post)");
@@ -200,6 +199,7 @@ void *task2_thread1() {
         semop(sem_id, sembuf, 1);
         check_errno("Невозможно заблокировать ресурс (in sembuf)");
         change_reg();
+        print_array();
         sleep(1);
         sembuf->sem_op = 1;
         semop(sem_id, sembuf, 1);
@@ -214,6 +214,7 @@ void *task2_thread2() {
         semop(sem_id, sembuf, 1);
         check_errno("Невозможно заблокировать ресурс (in semop)");
         reverse();
+        print_array();
         sleep(1);
         sembuf->sem_op = 1;
         semop(sem_id, sembuf, 1);
@@ -223,11 +224,9 @@ void *task2_thread2() {
 
 void *task3_thread1() {
     while (true) {
-        usleep(time_threads);
         pthread_mutex_lock(&mutex);
         check_errno("Невозможно заблокировать ресурс (в функции pthread_mutex_lock)");
         change_reg();
-        usleep(time_threads);
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно разблокировать ресурс (в функции pthread_mutex_unlock)");
         usleep(time_threads);
@@ -236,11 +235,9 @@ void *task3_thread1() {
 
 void *task3_thread2() {
     while (true) {
-        usleep(time_threads);
         pthread_mutex_lock(&mutex);
         check_errno("Невозможно заблокировать ресурс (pthread_mutex_lock)");
         reverse();
-        usleep(time_threads);
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно заблокировать ресурс (pthread_mutex_lock)");
         usleep(time_threads);
