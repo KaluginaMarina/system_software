@@ -65,6 +65,12 @@ void change_reg();
 void reverse();
 
 /**
+ * Функция проверки errno
+ * @param strerr - строка, выводящаяся в случае ошибки
+ */
+void check_errno(char* strerr);
+
+/**
  * поток 1 для 4 подзадания
  */
 void *task1_thread1();
