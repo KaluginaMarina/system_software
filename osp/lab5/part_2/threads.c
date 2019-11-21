@@ -7,6 +7,8 @@
 #include <string.h>
 #include <zconf.h>
 #include <semaphore.h>
+#include <sys/sem.h>
+#include <sys/ipc.h>
 #include "threads.h"
 
 void print_array() {
@@ -35,6 +37,7 @@ void parse_flag(int argc, char *argv[]) {
                 break;
             case '2':
                 printf("Второе подзадание.\n");
+                second_task();
                 break;
             case '3':
                 printf("Третье подзадание.\n");
@@ -58,8 +61,7 @@ void start(int argc, char *argv[]) {
 
 sem_t sem;
 void first_task() {
-    pthread_t thread1;
-    pthread_t thread2;
+    pthread_t thread1, thread2;
     errno = 0;
     sem_init(&sem, 0, 1);
     if (errno) {
@@ -75,6 +77,29 @@ void first_task() {
 
     pthread_join(thread1, NULL);
     pthread_join(thread2, NULL);
+}
+
+int sem_id;
+
+void second_task() {
+    pthread_t thread1, thread2;
+    errno = 0;
+    sem_id = semget(IPC_PRIVATE, 2, IPC_CREAT | PERM);
+    if(errno) {
+        fprintf(stderr, "Невовможно создать semget. Ошибка: %s\n", strerror(errno));
+        exit(1);
+    }
+    semctl(sem_id, 0, SETVAL, 1);
+    pthread_create(&thread1, NULL, task2_thread1, NULL);
+    pthread_create(&thread2, NULL, task2_thread2(), NULL);
+    if (errno) {
+        fprintf(stderr, "Невозможно создать потоки. Ошибка: %s\n", strerror(errno));
+        exit(1);
+    }
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    semctl(sem_id, 0, IPC_CREAT);
 }
 
 void change_reg(){
@@ -136,4 +161,32 @@ void *task1_thread2() {
         }
         usleep(500000);
     }
+}
+
+void *task2_thread1() {
+    errno = 0;
+    struct sembuf *sembuf = malloc(sizeof(struct sembuf));
+    sembuf->sem_op = -1; sembuf->sem_flg = 0; sembuf->sem_num = 0;
+    semop(sem_id, sembuf, 1);
+    if (errno) {
+        fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
+        exit(1);
+    }
+    change_reg();
+    sleep(1);
+    sembuf->sem_op = 1;
+}
+
+void *task2_thread2() {
+    errno = 0;
+    struct sembuf *sembuf = malloc(sizeof(struct sembuf));
+    sembuf->sem_op = -1; sembuf->sem_flg = 0; sembuf->sem_num = 0;
+    semop(sem_id, sembuf, 1);
+    if (errno) {
+        fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
+        exit(1);
+    }
+    reverse();
+    sleep(1);
+    sembuf->sem_op = 1;
 }
