@@ -60,6 +60,7 @@ void start(int argc, char *argv[]) {
 }
 
 sem_t sem;
+
 void first_task() {
     pthread_t thread1, thread2;
     errno = 0;
@@ -80,18 +81,22 @@ void first_task() {
 }
 
 int sem_id;
+struct sembuf *sembuf;
 
 void second_task() {
     pthread_t thread1, thread2;
+    sembuf = malloc(sizeof(struct sembuf));
+    sembuf->sem_flg = 0;
+    sembuf->sem_num = 0;
     errno = 0;
     sem_id = semget(IPC_PRIVATE, 2, IPC_CREAT | PERM);
-    if(errno) {
+    if (errno) {
         fprintf(stderr, "Невовможно создать semget. Ошибка: %s\n", strerror(errno));
         exit(1);
     }
     semctl(sem_id, 0, SETVAL, 1);
     pthread_create(&thread1, NULL, task2_thread1, NULL);
-    pthread_create(&thread2, NULL, task2_thread2(), NULL);
+    pthread_create(&thread2, NULL, task2_thread2, NULL);
     if (errno) {
         fprintf(stderr, "Невозможно создать потоки. Ошибка: %s\n", strerror(errno));
         exit(1);
@@ -102,7 +107,7 @@ void second_task() {
     semctl(sem_id, 0, IPC_CREAT);
 }
 
-void change_reg(){
+void change_reg() {
     for (int i = 0; i < SIZE; ++i) {
         if (array[i] >= 'A' && array[i] <= 'Z') {
             array[i] = array[i] - 'A' + 'a';
@@ -113,7 +118,7 @@ void change_reg(){
     print_array();
 }
 
-void reverse(){
+void reverse() {
     for (int i = 0; i < SIZE / 2; ++i) {
         char tmp = array[i];
         array[i] = array[SIZE - i - 1];
@@ -164,29 +169,41 @@ void *task1_thread2() {
 }
 
 void *task2_thread1() {
-    errno = 0;
-    struct sembuf *sembuf = malloc(sizeof(struct sembuf));
-    sembuf->sem_op = -1; sembuf->sem_flg = 0; sembuf->sem_num = 0;
-    semop(sem_id, sembuf, 1);
-    if (errno) {
-        fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
-        exit(1);
+    while (true) {
+        errno = 0;
+        sembuf->sem_op = -1;
+        semop(sem_id, sembuf, 1);
+        if (errno) {
+            fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
+            exit(1);
+        }
+        change_reg();
+        sleep(1);
+        sembuf->sem_op = 1;
+        semop(sem_id, sembuf, 1);
+        if (errno) {
+            fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
+            exit(1);
+        }
     }
-    change_reg();
-    sleep(1);
-    sembuf->sem_op = 1;
 }
 
 void *task2_thread2() {
-    errno = 0;
-    struct sembuf *sembuf = malloc(sizeof(struct sembuf));
-    sembuf->sem_op = -1; sembuf->sem_flg = 0; sembuf->sem_num = 0;
-    semop(sem_id, sembuf, 1);
-    if (errno) {
-        fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
-        exit(1);
+    while (true) {
+        errno = 0;
+        sembuf->sem_op = -1;
+        semop(sem_id, sembuf, 1);
+        if (errno) {
+            fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
+            exit(1);
+        }
+        reverse();
+        sleep(1);
+        sembuf->sem_op = 1;
+        semop(sem_id, sembuf, 1);
+        if (errno) {
+            fprintf(stderr, "Невозможно создать sembuf. Ошибка: %s\n", strerror(errno));
+            exit(1);
+        }
     }
-    reverse();
-    sleep(1);
-    sembuf->sem_op = 1;
 }
