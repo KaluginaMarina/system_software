@@ -16,3 +16,7 @@ osp/lab5/part_1/test.txt
 osp/lab5/part_2/cmake-build-debug/
 osp/lab5/part_2/.idea/
 osp/lab5/part_2/threads
+osp/lab5/part_3/cmake-build-debug/
+osp/lab5/part_3/.idea/
+osp/lab5/part_3/server
+osp/lab5/part_3/client

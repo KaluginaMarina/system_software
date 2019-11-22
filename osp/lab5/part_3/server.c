@@ -25,6 +25,9 @@ void set_ids(struct server_param *server_param) {
 
 void start_server(int argc, char *argv[]) {
     struct server_param *server_param = malloc(sizeof(struct server_param));
+    //unsigned int flag =
+    parse_flag(argc, argv);
+
     set_ids(server_param);
 
     while (true) {
@@ -43,3 +46,43 @@ void set_param(struct server_param *server_param) {
     getloadavg(server_param->loadavg, 3);
 }
 
+unsigned int parse_flag(int argc, char *argv[]) {
+    unsigned int flag = 0, opt = 0;
+    while ((opt = getopt(argc, argv, "sip")) != -1) {
+        switch (opt) {
+            case 's':
+                flag |= FLAG_SOCKET;
+                if (flag ^ FLAG_SOCKET) {
+                    fprintf(stderr, "Встречено несколько флагов.\n");
+                    exit(1);
+                }
+                printf("Клиент-серверное взаимодействие осуществляется при помощи unix domain socket.\n");
+                break;
+            case 'i':
+                flag |= FLAG_SIGNAL;
+                if (flag ^ FLAG_SIGNAL) {
+                    fprintf(stderr, "Встречено несколько флагов.\n");
+                    exit(1);
+                }
+                printf("Клиент-серверное взаимодействие осуществляется при помощи обработки сигналов.\n");
+                break;
+            case 'p':
+                flag |= FLAG_PIPE;
+                if (flag ^ FLAG_PIPE) {
+                    fprintf(stderr, "Встречено несколько флагов.\n");
+                    exit(1);
+                }
+                printf("Клиент-серверное взаимодействие осуществляется при помощи неименованных каналов.\n");
+                break;
+            default:
+                fprintf(stderr, "Используйте: \n\t./server -s|-i|-p filename.\n");
+                exit(1);
+        }
+    }
+    if (!flag) {
+        fprintf(stderr,
+                "Не указан способ передачи сообщения между клиентом и сервером.\nИспользуйте: \n\t./server -s|-i|-p filename.\n");
+        exit(1);
+    }
+    return flag;
+}

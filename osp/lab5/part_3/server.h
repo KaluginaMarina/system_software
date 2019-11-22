@@ -4,6 +4,16 @@
 #include <time.h>
 
 /**
+ * флаги заданий
+ * FLAG_SOCKET -- клиент-серверное взаимодействие при помощи сокетов
+ * FLAG_SIGNAL -- клиент-серверное взаимодействие при помощи сигналов
+ * FLAG_PIPE -- клиент-серверное приложение при помощи неименованных каналов
+ */
+#define FLAG_SOCKET 1
+#define FLAG_SIGNAL 2
+#define FLAG_PIPE 4
+
+/**
  * хранение параметров сервера
  */
 struct server_param {
@@ -40,5 +50,14 @@ void set_ids(struct server_param *server_param);
  * @param strerr - строка, выводящаяся в случае ошибки
  */
 void check_errno(char* strerr);
+
+/*
+ * Функция для получения ключей из командной строки
+ * @param argc - аргументы командной строки
+ * @param argv - аргументы командной строки
+ * @param filename - указатель на запись строки с ключом -f
+ * @return -- флаги ключей
+ */
+unsigned int parse_flag(int argc, char *argv[]);
 
 #endif //PART_3_SERVER_H
