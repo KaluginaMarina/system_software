@@ -7,6 +7,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <signal.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include "server.h"
 
 struct server_param *server_param;
@@ -31,9 +33,32 @@ void start_server(int argc, char *argv[]) {
     server_signal();
     printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
            server_param->gid);
+
+    errno = 0;
+    int sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    check_errno("Невозможно созать сокет");
+
+    struct sockaddr_un *sock_addr = malloc(sizeof(struct sockaddr_un));
+    memset(sock_addr, 0, sizeof(struct sockaddr_un));
+    sock_addr->sun_family = AF_UNIX;
+    strncpy(sock_addr->sun_path, "./socket", sizeof(sock_addr->sun_path) - 1);
+    check_errno("Невозможно указать путь");
+
+    bind(sock, (const struct sockaddr *) sock_addr, sizeof(struct sockaddr_un));
+    check_errno("Невозможно выполнить bind");
+
+    listen(sock, 0);
+    check_errno("Невозможно выполнить listen");
+
     while (true) {
+        errno = 0;
         sleep(1);
         set_param(server_param);
+        unsigned int size;
+        int client = accept(sock, (struct sockaddr *) sock_addr, &size);
+        write(client, server_param, sizeof(struct server_param));
+        check_errno("Невозможно написаь сообщение");
+        close(client);
     }
 }
 
