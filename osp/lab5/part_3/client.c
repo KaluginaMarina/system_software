@@ -15,7 +15,7 @@ void check_errno(char *strerr) {
     }
 }
 
-int main(int argc, char *argv[]) {
+struct server_param *get_param() {
     struct server_param *server_param = (struct server_param *) malloc(sizeof(struct server_param));
 
     int sock = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -32,11 +32,17 @@ int main(int argc, char *argv[]) {
 
     read(sock, server_param, sizeof(struct server_param));
     check_errno("Невозможно прочитать");
+    close(sock);
+    return server_param;
+}
 
+int main(int argc, char *argv[]) {
+    get_param();
+    struct server_param* server_param;
+    server_param = get_param();
     printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time,
            server_param->loadavg[0],
            server_param->loadavg[1], server_param->loadavg[2]);
 
-    close(sock);
     return 0;
 }
