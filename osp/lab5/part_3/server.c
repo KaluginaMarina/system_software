@@ -27,22 +27,12 @@ void set_ids(struct server_param *server_param) {
 
 void start_server(int argc, char *argv[]) {
     server_param = malloc(sizeof(struct server_param));
-    unsigned int flag = parse_flag(argc, argv);
-
-    if (flag & FLAG_SOCKET) {
-        printf("Клиент-серверное взаимодействие осуществляется при помощи unix domain socket.\n");
-    } else if (flag & FLAG_SIGNAL) {
-        printf("Клиент-серверное взаимодействие осуществляется при помощи обработки сигналов.\n");
-    } else if (flag & FLAG_PIPE) {
-        printf("Клиент-серверное взаимодействие осуществляется при помощи неименованных каналов.\n");
-    }
-
     set_ids(server_param);
-
+    server_signal();
     while (true) {
         sleep(1);
         set_param(server_param);
-        print_loadavg();
+        //print_loadavg();
     }
 }
 
@@ -68,64 +58,32 @@ void set_signal(int sig, void *func) {
 void server_signal(){
     errno = 0;
     set_signal(SIGHUP, print_pid);
-    set_signal(SIGINT, print_uid);
     set_signal(SIGTERM, print_gid);
     set_signal(SIGUSR1, print_work_time);
-    set_signal(SIGUSR2, print_loadavg);
+    set_signal(SIGUSR2, print_uid);
+    set_signal(SIGINT, print_loadavg);
 }
 
-unsigned int parse_flag(int argc, char *argv[]) {
-    unsigned int flag = 0, opt = 0;
-    while ((opt = getopt(argc, argv, "sip")) != -1) {
-        switch (opt) {
-            case 's':
-                flag |= FLAG_SOCKET;
-                if (flag ^ FLAG_SOCKET) {
-                    fprintf(stderr, "Встречено несколько флагов.\n");
-                    exit(1);
-                }
-                break;
-            case 'i':
-                flag |= FLAG_SIGNAL;
-                if (flag ^ FLAG_SIGNAL) {
-                    fprintf(stderr, "Встречено несколько флагов.\n");
-                    exit(1);
-                }
-                break;
-            case 'p':
-                flag |= FLAG_PIPE;
-                if (flag ^ FLAG_PIPE) {
-                    fprintf(stderr, "Встречено несколько флагов.\n");
-                    exit(1);
-                }
-                break;
-            default:
-                fprintf(stderr, "Используйте: \n\t./server -s|-i|-p filename.\n");
-                exit(1);
-        }
-    }
-    if (!flag) {
-        fprintf(stderr,
-                "Не указан способ передачи сообщения между клиентом и сервером.\nИспользуйте: \n\t./server -s|-i|-p filename.\n");
-        exit(1);
-    }
-    return flag;
-}
 
 void *print_pid() {
-    printf("PID: %ld", server_param->pid);
+    printf("PID: %ld\n", server_param->pid);
+    exit(0);
 }
 void *print_uid() {
-    printf("UID: %ld", server_param->uid);
+    printf("UID: %ld\n", server_param->uid);
+    exit(0);
 }
 void *print_gid() {
-    printf("GID: %ld", server_param->gid);
+    printf("GID: %ld\n", server_param->gid);
+    exit(0);
 }
 void *print_work_time() {
-    printf("Work time: %ld", server_param->work_time);
+    printf("Work time: %ld\n", server_param->work_time);
+    exit(0);
 }
 void *print_loadavg(){
     printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time,
            server_param->loadavg[0],
            server_param->loadavg[1], server_param->loadavg[2]);
+    exit(0);
 }
