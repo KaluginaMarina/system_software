@@ -41,6 +41,8 @@ struct server_param* get_param_message_queue_param(int mem_id) {
     return server_param;
 }
 
+
+
 struct server_param* get_param_mmap_file(char *filename) {
     errno = 0;
     int file = open(filename, O_RDONLY, NULL);
@@ -61,6 +63,7 @@ void get_param(int argc, char *argv[]) {
 
     if (flag & SHARED_MEMORY) {
         server_param = get_param_shared_memory(mem_id);
+        printf("Клиент-серверное взаимодействие осуществляется при помощи разделяемых сегментов памяти.\n");
     } else if (flag & MESSAGE_QUEUE) {
         printf("Клиент-серверное взаимодействие осуществляется при помощи System V message queue.\n");
         printf("mem_id = %d\n", mem_id);

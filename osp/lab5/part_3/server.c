@@ -71,11 +71,11 @@ void set_param(struct server_param *server_param) {
 
 void set_signal(int sig, void *func) {
     struct sigaction action;
-    sigset_t mask;
+    sigset_t *mask = (sigset_t*) malloc(sizeof(sigset_t));
     action.sa_handler = func;
     action.sa_flags = 0;
-    action.sa_mask  = mask;
-    sigemptyset(&mask);
+    action.sa_mask = *mask;
+    sigemptyset(mask);
     sigaction(sig, &action, NULL);
     check_errno("Не удалось создать segaction");
 }

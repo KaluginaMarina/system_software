@@ -43,6 +43,5 @@ int main(int argc, char *argv[]) {
     printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time,
            server_param->loadavg[0],
            server_param->loadavg[1], server_param->loadavg[2]);
-
     return 0;
 }
