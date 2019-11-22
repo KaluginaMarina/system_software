@@ -3,4 +3,5 @@ project(part_3 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(part_3 main.c server.c server.h)
+add_executable(part_3 main.c server.c server.h client.c client.h)
+add_executable(part_3 main_client.c main_client.c server.h client.c client.h)
