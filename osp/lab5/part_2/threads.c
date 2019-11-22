@@ -208,7 +208,6 @@ void forth_task() {
     check_errno("Невозможно создать поток");
 
     while (true) {
-        printf("!\n");
         errno = 0;
         usleep(time_threads[0]);
         pthread_rwlock_rdlock(&rwlock);
@@ -351,9 +350,9 @@ void *task4_thread2() {
 void *task4_thread3() {
     while (true) {
         usleep(time_threads[3]);
-        pthread_rwlock_rdlock(&rwlock);
+        pthread_rwlock_wrlock(&rwlock);
         check_errno("Невозможно заблокировать 3-й поток");
-        printf("Количество заглавных символов: %d\n");
+        printf("Количество заглавных символов: %d\n", count_letters());
         pthread_rwlock_unlock(&rwlock);
         check_errno("Невозможно разблокировать 3-й поток");
     }
