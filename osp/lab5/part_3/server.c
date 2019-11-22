@@ -41,7 +41,7 @@ void start_server(int argc, char *argv[]) {
     struct sockaddr_un *sock_addr = malloc(sizeof(struct sockaddr_un));
     memset(sock_addr, 0, sizeof(struct sockaddr_un));
     sock_addr->sun_family = AF_UNIX;
-    strncpy(sock_addr->sun_path, "./socket", sizeof(sock_addr->sun_path) - 1);
+    strncpy(sock_addr->sun_path, "/tmp/socket", sizeof(sock_addr->sun_path) - 1);
     check_errno("Невозможно указать путь");
 
     bind(sock, (const struct sockaddr *) sock_addr, sizeof(struct sockaddr_un));
