@@ -10,34 +10,38 @@
 #include "server.h"
 #include "client.h"
 
-void get_param_shared_memory(int mem_id) {
+void check_errno(char *strerr) {
+    if (errno) {
+        fprintf(stderr, "%s. Ошибка: %s\n", strerr, strerror(errno));
+        exit(1);
+    }
+}
+
+struct server_param* get_param_shared_memory(int mem_id) {
     printf("Клиент-серверное взаимодействие осуществляется при помощи разделяемых сегментов памяти.\n");
     printf("mem_id = %d\n", mem_id);
     errno = 0;
     struct server_param *serverparam = (struct server_param *) shmat(mem_id, NULL, SHM_RDONLY);
     check_errno("Невозможно получить доступ к указанной памяти");
-    printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", serverparam->work_time,
-           serverparam->loadavg[0], serverparam->loadavg[1], serverparam->loadavg[2]);
+    return serverparam;
 }
 
 
-void get_param_message_queue_param(int mem_id) {
+struct server_param* get_param_message_queue_param(int mem_id) {
     errno = 0;
     struct msgbuff msgbuff;
     msgbuff.mtype = MSGTYPE_QUERY;
     msgsnd(mem_id, &msgbuff, 0, 0);
     check_errno("Невозможно отправить запрос для получения информации в очереди");
-
     msgrcv(mem_id, &msgbuff, sizeof(struct server_param), MSGTYPE_REPLY, 0);
     check_errno("Невозможно получить сообщение");
 
     struct server_param *server_param = (struct server_param*) malloc(sizeof(struct server_param));
     memcpy(server_param, msgbuff.mtext, sizeof(struct server_param));
-    printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", server_param->work_time,
-           server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
+    return server_param;
 }
 
-void get_param_mmap_file(char *filename) {
+struct server_param* get_param_mmap_file(char *filename) {
     errno = 0;
     int file = open(filename, O_RDONLY, NULL);
     check_errno("Невозможно открыть файл");
@@ -45,28 +49,30 @@ void get_param_mmap_file(char *filename) {
     struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_READ,
                                                                      MAP_SHARED, file, 0);
     check_errno("Невозможно отобразить файл");
-    
-    printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", server_param->work_time,
-           server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
     close(file);
+    return server_param;
 }
 
 void get_param(int argc, char *argv[]) {
     int mem_id;
     char *filename = malloc(256 * sizeof(char));
+    struct server_param *server_param = malloc(sizeof(struct server_param));
     flag = parse_flag_cl(argc, argv, &mem_id, filename);
 
     if (flag & SHARED_MEMORY) {
-        get_param_shared_memory(mem_id);
+        server_param = get_param_shared_memory(mem_id);
     } else if (flag & MESSAGE_QUEUE) {
         printf("Клиент-серверное взаимодействие осуществляется при помощи System V message queue.\n");
         printf("mem_id = %d\n", mem_id);
         get_param_message_queue_param(mem_id);
+        server_param = get_param_message_queue_param(mem_id);
     } else if (flag & MMAP_FILE) {
         printf("Клиент-серверное взаимодействие осуществляется при помощи файла, отображённого в память с использованием mmap.\n");
         printf("filename = %s\n", filename);
-        get_param_mmap_file(filename);
+        server_param = get_param_mmap_file(filename);
     }
+    printf("work_time = %ld, loadavg: 1mim = %f, 5min = %f, 15min = %f\n", server_param->work_time,
+           server_param->loadavg[0], server_param->loadavg[1], server_param->loadavg[2]);
 }
 
 unsigned int parse_flag_cl(int argc, char *argv[], int *mem_id, char *filename) {
