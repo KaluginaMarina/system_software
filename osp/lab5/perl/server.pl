@@ -6,44 +6,43 @@ $ENV{'PATH'} = '/usr/bin';
 $ENV{CDPATH}="";
 $ENV{ENV}="";
 
-# variables
+my $path = '/tmp/socket';
 my $pid = $$;
 my $uid = $<; 
 my @gr_list = split(/ /, $(); 
 my $gid = $gr_list[0];
-
 my $start_time = time();
-my $run_time;
-
+my $work_time;
 my @sys_load;
 
-my $SOCKET_PATH = '/tmp/socket';
 
-$SIG{HUP} = sub{ print "PID: $pid\n"; };
-$SIG{INT} = sub{ print "UID: $uid\n"; };
-$SIG{TERM} = sub{ print "GID: $gid\n"; };
-$SIG{USR1} = sub{ print "Server works: $run_time\n"; };
-$SIG{USR2} = sub{ print "Average load system time:\n \t1 minute - $sys_load[0];\n \t5 minutes - $sys_load[1];\n \t15 minutes - $sys_load[2]\n"; };
+$work_time = time() - $start_time;
+@sys_load = split(/load average: /, qx(uptime));
+@sys_load = split(', ', $sys_load[1]);
 
-# functions
+
 sub update_info {
-	$run_time = time() - $start_time;
-	@sys_load = split(/load average: /, qx(uptime));
+    $work_time = time() - $start_time;
+    @sys_load = split(/load average: /, qx(uptime));
     @sys_load = split(', ', $sys_load[1]);
 }
 
-# main
-print("Using sockets. Server is running...\n");
-unlink $SOCKET_PATH;
+$SIG{HUP} = sub{ print "Сервер уничтожен HUP'ом\nwork_time = $work_time, 1min = $sys_load[0], 5min = $sys_load[1], 15min = $sys_load[2]\n"; };
+$SIG{INT} = sub{ print "Сервер уничтожен INT'ом\nwork_time = $work_time, 1min = $sys_load[0], 5min = $sys_load[1], 15min = $sys_load[2]\n"; };
+$SIG{TERM} = sub{ print "Сервер уничтожен TERM'ом\nwork_time = $work_time, 1min = $sys_load[0], 5min = $sys_load[1], 15min = $sys_load[2]\n"; };
+$SIG{USR1} = sub{ print "Сервер уничтожен USR1'ом\nwork_time = $work_time, 1min = $sys_load[0], 5min = $sys_load[1], 15min = $sys_load[2]\n"; };
+$SIG{USR2} = sub{ print "Сервер уничтожен USR2'ом\nwork_time = $work_time, 1min = $sys_load[0], 5min = $sys_load[1], 15min = $sys_load[2]\n"; };
+
+print("Сервер запущен.\npid = $pid, uid = $uid, gid = $gid\n");
+unlink $path;
 my $server = IO::Socket::UNIX->new(
         Type => SOCK_STREAM(),
-        Local => $SOCKET_PATH,
+        Local => $path,
         Listen => 1,
-    ) or die "Cannot create a socket\n";
+    ) or die "Невозможно создать сокет\n";
 	
 while (my $conn = $server->accept()) {
 	  update_info;
-      $conn->print(" PID: $pid\n UID: $uid\n GID: $gid\n Server works: $run_time\n 
-	  Average load system time:\n \t1 minute - $sys_load[0];\n \t5 minutes - $sys_load[1];\n \t15 minutes - $sys_load[2]\n");
+      $conn->print("work_time = $work_time, 1min = $sys_load[0], 5min = $sys_load[1], 15min = $sys_load[2]\n");
 	  $conn->close();
     }
