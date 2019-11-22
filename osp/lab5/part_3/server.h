@@ -46,6 +46,11 @@ void set_param(struct server_param *server_param);
 void set_ids(struct server_param *server_param);
 
 /**
+ * Функция для сервера, использующего  unix domain socket
+ */
+ void server_signal();
+
+/**
  * Функция проверки errno
  * @param strerr - строка, выводящаяся в случае ошибки
  */
@@ -60,4 +65,12 @@ void check_errno(char* strerr);
  */
 unsigned int parse_flag(int argc, char *argv[]);
 
+/**
+ * actions
+ */
+void *print_pid();
+void *print_uid();
+void *print_gid();
+void *print_work_time();
+void *print_loadavg();
 #endif //PART_3_SERVER_H
