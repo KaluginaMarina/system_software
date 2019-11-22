@@ -120,6 +120,7 @@ void parse_flag(int argc, char *argv[]) {
                             "Встречен неверный формат. Используйте: \n\t.%s\n", format);
                     exit(1);
                 }
+                forth_task();
                 break;
             default:
                 fprintf(stderr, "Неверный ключ. Используйте: \n\t%s\n", format);
@@ -183,7 +184,7 @@ void third_task() {
 
     pthread_create(&thread1, NULL, task3_thread1, NULL);
     pthread_create(&thread2, NULL, task3_thread2, NULL);
-    check_errno("невозможно создать поток");
+    check_errno("Невозможно создать поток");
 
     while (true) {
         pthread_mutex_lock(&mutex);
@@ -192,6 +193,29 @@ void third_task() {
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно выполнить pthread_mutex_lock");
         usleep(time_threads[0]);
+    }
+}
+
+pthread_rwlock_t rwlock = PTHREAD_RWLOCK_INITIALIZER;
+
+void forth_task() {
+    errno = 0;
+    pthread_t thread1, thread2, thread3;
+
+    pthread_create(&thread1, NULL, task4_thread1, NULL);
+    pthread_create(&thread2, NULL, task4_thread2, NULL);
+    pthread_create(&thread3, NULL, task4_thread3, NULL);
+    check_errno("Невозможно создать поток");
+
+    while (true) {
+        printf("!\n");
+        errno = 0;
+        usleep(time_threads[0]);
+        pthread_rwlock_rdlock(&rwlock);
+        check_errno("Невозможно заблокировать ресурс главным потоком");
+        print_array();
+        pthread_rwlock_unlock(&rwlock);
+        check_errno("Невозможно разблокировать ресурс в главном потоке");
     }
 }
 
@@ -299,5 +323,38 @@ void *task3_thread2() {
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно заблокировать ресурс (pthread_mutex_lock)");
         usleep(time_threads[2]);
+    }
+}
+
+void *task4_thread1() {
+    while (true) {
+        usleep(time_threads[1]);
+        pthread_rwlock_rdlock(&rwlock);
+        check_errno("Невозможно заблокировать 1-й поток");
+        change_reg();
+        pthread_rwlock_unlock(&rwlock);
+        check_errno("Невозможно разблокировать 1-й поток");
+    }
+}
+
+void *task4_thread2() {
+    while (true) {
+        usleep(time_threads[2]);
+        pthread_rwlock_rdlock(&rwlock);
+        check_errno("Невозможно заблокировать 2-й поток");
+        reverse();
+        pthread_rwlock_unlock(&rwlock);
+        check_errno("Невозможно разблокировать 2-й поток");
+    }
+}
+
+void *task4_thread3() {
+    while (true) {
+        usleep(time_threads[3]);
+        pthread_rwlock_rdlock(&rwlock);
+        check_errno("Невозможно заблокировать 3-й поток");
+        printf("Количество заглавных символов: %d\n");
+        pthread_rwlock_unlock(&rwlock);
+        check_errno("Невозможно разблокировать 3-й поток");
     }
 }
