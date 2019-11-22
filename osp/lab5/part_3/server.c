@@ -29,10 +29,11 @@ void start_server(int argc, char *argv[]) {
     server_param = malloc(sizeof(struct server_param));
     set_ids(server_param);
     server_signal();
+    printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
+           server_param->gid);
     while (true) {
         sleep(1);
         set_param(server_param);
-        //print_loadavg();
     }
 }
 
@@ -57,32 +58,42 @@ void set_signal(int sig, void *func) {
 
 void server_signal(){
     errno = 0;
-    set_signal(SIGHUP, print_pid);
-    set_signal(SIGTERM, print_gid);
-    set_signal(SIGUSR1, print_work_time);
-    set_signal(SIGUSR2, print_uid);
-    set_signal(SIGINT, print_loadavg);
+    set_signal(SIGHUP, print_hup);
+    set_signal(SIGTERM, print_term);
+    set_signal(SIGINT, print_int);
+    set_signal(SIGUSR1, print_usr1);
+    set_signal(SIGUSR2, print_usr2);
 }
 
+void *print_hup() {
+    printf("Сервер был уничтожен HUP'ом");
+    print_param();
+    exit(0);
+}
+void *print_term() {
+    printf("Сервер был уничтожен TERM'ом");
+    print_param();
+    exit(0);
+}
+void *print_int() {
+    printf("Сервер был уничтожен INT'ом");
+    print_param();
+    exit(0);
+}
+void *print_usr1() {
+    printf("Сервер был уничтожен USR1'ом");
+    print_param();
+    exit(0);
+}
 
-void *print_pid() {
-    printf("PID: %ld\n", server_param->pid);
+void *print_usr2() {
+    printf("Сервер был уничтожен USR2'ом");
+    print_param();
     exit(0);
 }
-void *print_uid() {
-    printf("UID: %ld\n", server_param->uid);
-    exit(0);
-}
-void *print_gid() {
-    printf("GID: %ld\n", server_param->gid);
-    exit(0);
-}
-void *print_work_time() {
-    printf("Work time: %ld\n", server_param->work_time);
-    exit(0);
-}
-void *print_loadavg(){
-    printf("work_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time,
+
+void print_param(){
+    printf("\nwork_time = %ld, 1min = %.2f, 5min = %.2f, 15min = %.2f\n", server_param->work_time,
            server_param->loadavg[0],
            server_param->loadavg[1], server_param->loadavg[2]);
     exit(0);

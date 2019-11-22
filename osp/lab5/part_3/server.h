@@ -47,11 +47,13 @@ void set_ids(struct server_param *server_param);
 void check_errno(char* strerr);
 
 /**
- * actions
+ * Вывод информации на экран
  */
-void *print_pid();
-void *print_uid();
-void *print_gid();
-void *print_work_time();
-void *print_loadavg();
+void print_param();
+
+void *print_hup();
+void *print_term();
+void *print_int();
+void *print_usr1();
+void *print_usr2();
 #endif //PART_3_SERVER_H
