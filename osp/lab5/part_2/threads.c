@@ -11,8 +11,8 @@
 #include <sys/ipc.h>
 #include "threads.h"
 
-// [главный поток, смена регистра, реверс, счетчик]
-unsigned long time_threads[4] = {1000000, 1000000, 1000000, 1000000};
+
+struct time_threads time_threads = {1000000, 1000000, 1000000, 1000000};
 const char *format = "./threads -1\n"
                      "\t./threads -2\n"
                      "\t./threads -3 [TIME | TIME_MAIN TIME1 TIME2]\n"
@@ -62,21 +62,21 @@ void parse_flag(int argc, char *argv[]) {
                 printf("Третье подзадание.\n");
                 if (argc == optind) {
                     printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n",
-                           time_threads[0]);
+                           time_threads.time_main);
                 } else if (optind + 1 == argc) {
                     char *p;
-                    u_long tmp = (unsigned long) strtol(argv[optind], &p, 10);
+                    unsigned long tmp = (unsigned long) strtol(argv[optind], &p, 10);
                     if (errno || *p != '\0' || time < 0) {
                         fprintf(stderr, "Встречен неверный формат. Используйте: \n\t%s\n", format);
                         exit(1);
                     }
-                    for (int i = 0; i < 3; ++i) {
-                        time_threads[i] = tmp;
-                    }
+                    time_threads.time_main = tmp;
+                    time_threads.time_change = tmp;
+                    time_threads.time_reverse = tmp;
                 } else if (optind + 3 == argc) {
                     char *p;
                     for (int i = 0; i < 3; ++i) {
-                        time_threads[i] = (unsigned long) strtol(argv[optind++], &p, 10);
+                        *(&time_threads.time_main + i) = (unsigned long) strtol(argv[optind++], &p, 10);
                         if (errno || *p != '\0' || time < 0) {
                             fprintf(stderr,
                                     "Встречен неверный формат. Используйте: \n\t%s\n", format);
@@ -94,21 +94,21 @@ void parse_flag(int argc, char *argv[]) {
                 printf("Четвертое подзадание:\n");
                 if (argc == optind) {
                     printf("Не указано количество микросекунд.\nЗадано дефолтное значение TIME = %ld\n",
-                           time_threads[0]);
+                           time_threads.time_main);
                 } else if (optind + 1 == argc) {
                     char *p;
-                    u_long tmp = (unsigned long) strtol(argv[optind], &p, 10);
+                    unsigned long tmp = (unsigned long) strtol(argv[optind], &p, 10);
                     if (errno || *p != '\0' || time < 0) {
                         fprintf(stderr, "Встречен неверный формат. Используйте: \n\t%s\n", format);
                         exit(1);
                     }
                     for (int i = 0; i < 4; ++i) {
-                        time_threads[i] = tmp;
+                        *(&time_threads.time_main + i) = tmp;
                     }
                 } else if (optind + 4 == argc) {
                     char *p;
                     for (int i = 0; i < 4; ++i) {
-                        time_threads[i] = (unsigned long) strtol(argv[optind++], &p, 10);
+                        *(&time_threads.time_main + i) = (unsigned long) strtol(argv[optind++], &p, 10);
                         if (errno || *p != '\0' || time < 0) {
                             fprintf(stderr,
                                     "Встречен неверный формат. Используйте: \n\t%s\n", format);
@@ -192,7 +192,7 @@ void third_task() {
         print_array();
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно выполнить pthread_mutex_lock");
-        usleep(time_threads[0]);
+        usleep(time_threads.time_main);
     }
 }
 
@@ -209,7 +209,7 @@ void forth_task() {
 
     while (true) {
         errno = 0;
-        usleep(time_threads[0]);
+        usleep(time_threads.time_main);
         pthread_rwlock_rdlock(&rwlock);
         check_errno("Невозможно заблокировать ресурс главным потоком");
         print_array();
@@ -310,7 +310,7 @@ void *task3_thread1() {
         change_reg();
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно разблокировать ресурс (в функции pthread_mutex_unlock)");
-        usleep(time_threads[1]);
+        usleep(time_threads.time_change);
     }
 }
 
@@ -321,14 +321,14 @@ void *task3_thread2() {
         reverse();
         pthread_mutex_unlock(&mutex);
         check_errno("Невозможно заблокировать ресурс (pthread_mutex_lock)");
-        usleep(time_threads[2]);
+        usleep(time_threads.time_reverse);
     }
 }
 
 void *task4_thread1() {
     while (true) {
-        usleep(time_threads[1]);
-        pthread_rwlock_rdlock(&rwlock);
+        usleep(time_threads.time_change);
+        pthread_rwlock_wrlock(&rwlock);
         check_errno("Невозможно заблокировать 1-й поток");
         change_reg();
         pthread_rwlock_unlock(&rwlock);
@@ -338,8 +338,8 @@ void *task4_thread1() {
 
 void *task4_thread2() {
     while (true) {
-        usleep(time_threads[2]);
-        pthread_rwlock_rdlock(&rwlock);
+        usleep(time_threads.time_reverse);
+        pthread_rwlock_wrlock(&rwlock);
         check_errno("Невозможно заблокировать 2-й поток");
         reverse();
         pthread_rwlock_unlock(&rwlock);
@@ -349,8 +349,8 @@ void *task4_thread2() {
 
 void *task4_thread3() {
     while (true) {
-        usleep(time_threads[3]);
-        pthread_rwlock_wrlock(&rwlock);
+        usleep(time_threads.count_letter);
+        pthread_rwlock_rdlock(&rwlock);
         check_errno("Невозможно заблокировать 3-й поток");
         printf("Количество заглавных символов: %d\n", count_letters());
         pthread_rwlock_unlock(&rwlock);

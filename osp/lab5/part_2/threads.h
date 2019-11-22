@@ -10,6 +10,16 @@
 volatile char array[SIZE];
 
 /**
+ * структура для хранения времени
+ */
+struct time_threads {
+    unsigned long time_main;
+    unsigned long time_change;
+    unsigned long time_reverse;
+    unsigned long count_letter;
+};
+
+/**
  * вывод массива в stdin
  */
 void print_array();
