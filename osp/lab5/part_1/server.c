@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <zconf.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <sys/file.h>
 #include <string.h>
 #include <sys/shm.h>
 #include <sys/msg.h>
-//#include <sys/loadavg.h>
+#include <unistd.h>
+//#include <sys/loadavg.h> // раскомментировать при запуске на хелиосе
 #include <sys/ipc.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -77,7 +80,15 @@ struct server_param *mmap_file(char *filename) {
     file = open(filename, O_CREAT | O_RDWR, PERM);
     server_signal();
     check_errno("Невозможно создать/открыть файл");
-    flock(file, LOCK_EX|LOCK_NB);
+    
+     struct flock lock;
+     lock.l_type = F_WRLCK;
+     lock.l_whence = SEEK_SET;
+     lock.l_start = 0;
+     lock.l_len = 0;
+     fcntl(file, F_SETLK, &lock);
+		          
+    
     ftruncate(file, sizeof(struct server_param));
     check_errno("Невозможно открыть файл");
 
@@ -183,7 +194,7 @@ unsigned int parse_flag(int argc, char *argv[], char* filename) {
 void *die() {
     printf("Уничтожено.\n");
     shmdt((const void *) mem_id);
-    flock(file, LOCK_UN);
+    lockf(file, F_ULOCK, 0);
     exit(0);
 }
 
