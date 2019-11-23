@@ -5,12 +5,14 @@
 #include <string.h>
 #include <sys/shm.h>
 #include <sys/msg.h>
-#include <sys/loadavg.h>
+//#include <sys/loadavg.h>
 #include <sys/ipc.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <time.h>
+#include <signal.h>
+#include <sys/file.h>
 #include "server.h"
 
 void check_errno(char *strerr) {
@@ -27,9 +29,11 @@ void set_ids(struct server_param *server_param) {
     server_param->gid = getgid();
 }
 
+int mem_id;
 struct server_param *shared_memory_param() {
     errno = 0;
-    int mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | PERM);
+    server_signal();
+    mem_id = shmget(IPC_PRIVATE, sizeof(struct server_param), IPC_CREAT | PERM);
     if (mem_id < 0) {
         fprintf(stderr, "Error: shmget.\n");
         exit(1);
@@ -51,9 +55,9 @@ struct server_param *shared_memory_param() {
     return server_param;
 }
 
-struct server_param *message_queue_param(int *mem_id) {
+struct server_param *message_queue_param(int *mem_id_q) {
     errno = 0;
-    *mem_id = msgget(IPC_PRIVATE, IPC_CREAT | PERM);
+    *mem_id_q = msgget(IPC_PRIVATE, IPC_CREAT | PERM);
 
     check_errno("Невозможно создать очередь сообщений");
 
@@ -63,17 +67,20 @@ struct server_param *message_queue_param(int *mem_id) {
 
     printf("Сервер запущен.\npid = %ld, uid = %ld, gid = %ld\n", server_param->pid, server_param->uid,
            server_param->gid);
-    printf("Используются очередь сообщений, mem_id = %d\n", *mem_id);
+    printf("Используются очередь сообщений, mem_id = %d\n", *mem_id_q);
     return server_param;
 }
 
+int file;
 struct server_param *mmap_file(char *filename) {
     errno = 0;
-    int file = open(filename, O_CREAT | O_RDWR, PERM);
+    file = open(filename, O_CREAT | O_RDWR, PERM);
+    server_signal();
     check_errno("Невозможно создать/открыть файл");
-
+    flock(file, LOCK_EX|LOCK_NB);
     ftruncate(file, sizeof(struct server_param));
     check_errno("Невозможно открыть файл");
+
 
     struct server_param *server_param = (struct server_param *) mmap(NULL, sizeof(struct server_param), PROT_WRITE,
                                                                      MAP_SHARED, file, 0);
@@ -170,4 +177,28 @@ unsigned int parse_flag(int argc, char *argv[], char* filename) {
         exit(1);
     }
     return flag;
+}
+
+
+void *die() {
+    printf("Уничтожено.\n");
+    shmdt((const void *) mem_id);
+    flock(file, LOCK_UN);
+    exit(0);
+}
+
+void set_signal(int sig, void *func) {
+    struct sigaction action;
+    sigset_t *mask = (sigset_t*) malloc(sizeof(sigset_t));
+    action.sa_handler = func;
+    action.sa_flags = 0;
+    action.sa_mask = *mask;
+    sigemptyset(mask);
+    sigaction(sig, &action, NULL);
+    check_errno("Не удалось создать segaction");
+}
+
+void server_signal(){
+    errno = 0;
+    set_signal(SIGINT, die);
 }

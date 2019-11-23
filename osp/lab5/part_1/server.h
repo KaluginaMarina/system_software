@@ -82,10 +82,10 @@ struct server_param* shared_memory_param();
 /**
  * Функция для хранения требуемой информации и обмена информацией между клиентом и сервером
  * при помощи System V message queue
- * @param mem_id -- указатель на записть номера
+ * @param mem_id_q -- указатель на записть номера
  * @return указатель на структуру
  */
-struct server_param* message_queue_param(int *mem_id);
+struct server_param* message_queue_param(int *mem_id_q);
 
 /**
  * Функция для обмена информации при помощи файла, отображённого в память с использованием mmap
@@ -105,4 +105,7 @@ void set_ids(struct server_param *server_param);
  * @param strerr - строка, выводящаяся в случае ошибки
  */
 void check_errno(char* strerr);
+void *die();
+void set_signal(int sig, void *func);
+void server_signal();
 #endif //PART_1_SERVER_SERVER_H
