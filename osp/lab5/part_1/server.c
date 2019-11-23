@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/shm.h>
 #include <sys/msg.h>
+#include <sys/loadavg.h>
 #include <sys/ipc.h>
 #include <errno.h>
 #include <fcntl.h>

@@ -24,7 +24,7 @@ struct server_param *get_param() {
     struct sockaddr_un sock_addr;
     memset(&sock_addr, 0, sizeof(struct sockaddr_un));
     sock_addr.sun_family = AF_UNIX;
-    strncpy(sock_addr.sun_path, "/tmp/socket", sizeof(sock_addr.sun_path) - 1);
+    strncpy(sock_addr.sun_path, "/tmp/socket5", sizeof(sock_addr.sun_path) - 1);
     check_errno("Невозможно создать адрес");
 
     connect(sock, (const struct sockaddr *) &sock_addr, sizeof(struct sockaddr_un));
@@ -45,3 +45,4 @@ int main(int argc, char *argv[]) {
            server_param->loadavg[1], server_param->loadavg[2]);
     return 0;
 }
+

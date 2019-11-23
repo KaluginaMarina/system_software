@@ -56,4 +56,5 @@ void *print_term();
 void *print_int();
 void *print_usr1();
 void *print_usr2();
+void unlink_socket();
 #endif //PART_3_SERVER_H

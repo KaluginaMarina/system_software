@@ -1,10 +1,10 @@
-#include <bits/types/time_t.h>
 #include <errno.h>
 #include <stdio.h>
 #include <time.h>
 #include <zconf.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/loadavg.h>
 #include <stdbool.h>
 #include <signal.h>
 #include <sys/socket.h>
@@ -12,6 +12,8 @@
 #include "server.h"
 
 struct server_param *server_param;
+
+int sock;
 
 void check_errno(char *strerr) {
     if (errno) {
@@ -27,6 +29,10 @@ void set_ids(struct server_param *server_param) {
     server_param->gid = getgid();
 }
 
+void unlink_socket(){
+    close(sock);
+}
+
 void start_server(int argc, char *argv[]) {
     server_param = malloc(sizeof(struct server_param));
     set_ids(server_param);
@@ -35,15 +41,15 @@ void start_server(int argc, char *argv[]) {
            server_param->gid);
 
     errno = 0;
-    int sock = socket(AF_UNIX, SOCK_STREAM, 0);
-    check_errno("Невозможно созать сокет");
+    sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    check_errno("Невозможно создать сокет");
 
     struct sockaddr_un *sock_addr = malloc(sizeof(struct sockaddr_un));
     memset(sock_addr, 0, sizeof(struct sockaddr_un));
     sock_addr->sun_family = AF_UNIX;
-    strncpy(sock_addr->sun_path, "/tmp/socket", sizeof(sock_addr->sun_path) - 1);
+    strncpy(sock_addr->sun_path, "/tmp/socket5", sizeof(sock_addr->sun_path) - 1);
     check_errno("Невозможно указать путь");
-
+    unlink("/tmp/socket5");
     bind(sock, (const struct sockaddr *) sock_addr, sizeof(struct sockaddr_un));
     check_errno("Невозможно выполнить bind");
 
@@ -54,12 +60,13 @@ void start_server(int argc, char *argv[]) {
         errno = 0;
         sleep(1);
         set_param(server_param);
-        unsigned int size;
+        unsigned int size=sizeof(struct sockaddr_un);
         int client = accept(sock, (struct sockaddr *) sock_addr, &size);
         write(client, server_param, sizeof(struct server_param));
-        check_errno("Невозможно написаь сообщение");
+        check_errno("Невозможно написать сообщение");
         close(client);
     }
+    unlink_socket();
 }
 
 void set_param(struct server_param *server_param) {
@@ -93,27 +100,32 @@ void server_signal(){
 void *print_hup() {
     printf("Сервер был уничтожен HUP'ом");
     print_param();
+    unlink_socket();
     exit(0);
 }
 void *print_term() {
     printf("Сервер был уничтожен TERM'ом");
     print_param();
+    unlink_socket();
     exit(0);
 }
 void *print_int() {
     printf("Сервер был уничтожен INT'ом");
     print_param();
+    unlink_socket();
     exit(0);
 }
 void *print_usr1() {
     printf("Сервер был уничтожен USR1'ом");
     print_param();
+    unlink_socket();
     exit(0);
 }
 
 void *print_usr2() {
     printf("Сервер был уничтожен USR2'ом");
     print_param();
+    unlink_socket();
     exit(0);
 }
 

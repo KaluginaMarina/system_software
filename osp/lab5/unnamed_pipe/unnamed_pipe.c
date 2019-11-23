@@ -60,7 +60,6 @@ int main(int argc, char* argv[]) {
     if (!frk){
         close(pipefd_wr);
         dup2(pipefd_rd, STDIN_FILENO);
-        printf("wc -c:\n");
         execlp("/usr/bin/wc", "wc", "-c", NULL);
         check_errno("Невозможно выполнить wc");
         printf("\n");
@@ -71,3 +70,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+

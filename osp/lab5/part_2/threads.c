@@ -281,10 +281,11 @@ void *task2_thread1() {
         check_errno("Невозможно заблокировать ресурс (in sembuf)");
         change_reg();
         print_array();
-        sleep(1);
+	sleep(1);
         sembuf->sem_op = 1;
         semop(sem_id, sembuf, 1);
         check_errno("Невозможно разблокировать ресурс (in sembuf)");
+	sleep(1);
     }
 }
 
@@ -296,10 +297,11 @@ void *task2_thread2() {
         check_errno("Невозможно заблокировать ресурс (in semop)");
         reverse();
         print_array();
-        sleep(1);
+	sleep(1);
         sembuf->sem_op = 1;
         semop(sem_id, sembuf, 1);
         check_errno("Невозможно разблокировать ресурс (in semop)");
+	sleep(1);
     }
 }
 
@@ -357,3 +359,4 @@ void *task4_thread3() {
         check_errno("Невозможно разблокировать 3-й поток");
     }
 }
+
