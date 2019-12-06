@@ -29,6 +29,9 @@ void start_server() {
     check_errno("Невозможно привязать к сокету локальный адрес");
     listen(sockfd, 10);
     check_errno("Невозможно начать прослушивать соединения");
+
+    printf("Listening on %d\n", port);
+
     while(true) {
         int client = accept(sockfd, NULL, NULL);
         check_errno("Ошибка при соединении с клиентом");
