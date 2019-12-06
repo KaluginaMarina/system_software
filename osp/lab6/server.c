@@ -7,6 +7,7 @@
 #include <zconf.h>
 #include <netinet/in.h>
 
+
 void check_errno(char *strerr) {
     if (errno) {
         fprintf(stderr, "%s. Ошибка: %s\n", strerr, strerror(errno));
@@ -14,8 +15,21 @@ void check_errno(char *strerr) {
     }
 }
 
-void start_server() {
-    unsigned int port = 1215;
+unsigned int check_args(int argc, char* argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Используйте: ./server port");
+        exit(1);
+    }
+    char *p;
+    unsigned int port = (int) strtol(argv[optind], &p, 10);
+    if (errno != 0 || port < 0) {
+        fprintf(stderr, "Указан неверный порт.\n");
+        exit(1);
+    }
+    return port;
+}
+
+void start_server(unsigned int port) {
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     check_errno("Невозможно создать сокет");
     // ......sockaddr_in...........
@@ -38,13 +52,13 @@ void start_server() {
         if (!fork()) {
             check_errno("Невозможно создать подпоток");
             printf("Клиент приконнектился: %d\n", client);
-            close(client);
-            break;
+
+
         }
     }
 }
 
-int main() {
-    start_server();
+int main(int argc, char* argv[]) {
+    start_server(check_args(argc, argv));
     return 0;
 }

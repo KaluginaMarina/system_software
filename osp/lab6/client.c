@@ -39,9 +39,7 @@ void getinfo(int argc, char* argv[]) {
 
     for (int i = 3; i < argc; ++i) {
         write(sockfd, argv[i], strlen(argv[i]));
-        //CHK_ERRNO(write(serverfd, CRLF, sizeof(CRLF) - 1));
     }
-    //CHK_ERRNO(write(serverfd, CRLF, sizeof(CRLF) - 1));
 
     char *buf = (char*)malloc(2048 * sizeof(char));
     int bytes_read;
