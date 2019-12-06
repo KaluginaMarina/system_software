@@ -33,7 +33,8 @@ void start_server() {
     printf("Listening on %d\n", port);
 
     while(true) {
-        int client = accept(sockfd, NULL, NULL);
+        //int client = accept(sockfd, NULL, NULL);
+        accept(sockfd, NULL, NULL);
         check_errno("Ошибка при соединении с клиентом");
         int frk = fork();
         check_errno("Невозможно создать подпоток");
