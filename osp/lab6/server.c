@@ -20,19 +20,28 @@ void print_dir(int fd, const char *dirname) {
     errno = 0;
     DIR *dir = opendir(dirname);
     if (errno != 0) {
-        dprintf(fd, "Невозможно открыть \"%s\". Ошибка %s\n\n", dirname, strerror(errno));
+        char * buf = (char *)malloc(2048);
+        sprintf(buf, "Невозможно открыть \"%s\". Ошибка %s\n\n", dirname, strerror(errno));
+        write(fd, buf, strlen(buf));
+        free(buf);
         errno = 0;
         return;
     }
 
-    dprintf(fd, "DIR \"%s\":\n", dirname);
+    char * buf = (char *)malloc(2048);
+    sprintf(buf, "DIR \"%s\":\n", dirname);
+    write(fd, buf, strlen(buf));
+    free(buf);
 
     struct dirent *ent;
     while ((ent = readdir(dir)) != NULL){
-        dprintf(fd, "%s\n", ent->d_name);
-        printf("%s\n", ent->d_name);
+        char * buf = (char *)malloc(2048);
+        sprintf(buf, "%s\n", ent->d_name);
+        write(fd, buf, strlen(buf));
+        free(buf);
     }
-    dprintf(fd, "\n\n");
+    char nn[] = "\n\n";
+    write(fd, nn, strlen(nn));
     closedir(dir);
 }
 
@@ -43,7 +52,7 @@ unsigned int check_args(int argc, char *argv[]) {
     }
     char *p;
     unsigned int port = (int) strtol(argv[optind], &p, 10);
-    if (errno != 0 || port < 0 || *p != '\0') {
+    if (errno != 0 || port < 0 || *p != '\0' || port > 65635) {
         fprintf(stderr, "Указан неверный порт.\n");
         exit(1);
     }
