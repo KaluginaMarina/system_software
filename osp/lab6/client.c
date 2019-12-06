@@ -45,12 +45,15 @@ void getinfo(int argc, char* argv[]) {
 
     for (int i = 3; i < argc; ++i) {
         write(sockfd, argv[i], strlen(argv[i]));
+        write(sockfd, "\n", 1);
     }
+    write(sockfd, "\0", 1);
 
     char *buf = (char*)malloc(2048 * sizeof(char));
     int bytes_read;
     while ((bytes_read = read(sockfd, buf, 2048)) > 0) {
         write(STDOUT_FILENO, buf, bytes_read);
+        printf("%s\n", buf);
     }
 
     close(sockfd);
