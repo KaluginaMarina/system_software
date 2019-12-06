@@ -20,18 +20,20 @@ void print_dir(int fd, const char *dirname) {
     errno = 0;
     DIR *dir = opendir(dirname);
     if (errno != 0) {
-        dprintf(fd, "Failed to open %s: %s\n\n", dirname, strerror(errno));
+        dprintf(fd, "Невозможно открыть \"%s\". Ошибка %s\n\n", dirname, strerror(errno));
         errno = 0;
         return;
     }
 
-    dprintf(fd, "Contents of %s:\n", dirname);
+    dprintf(fd, "DIR \"%s\":\n", dirname);
 
     struct dirent *ent;
-    while ((ent = readdir(dir)) != NULL)
+    while ((ent = readdir(dir)) != NULL){
         dprintf(fd, "%s\n", ent->d_name);
-
+        printf("%s\n", ent->d_name);
+    }
     dprintf(fd, "\n");
+
     closedir(dir);
 }
 
