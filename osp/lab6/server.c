@@ -15,7 +15,7 @@ void check_errno(char *strerr) {
 }
 
 void start_server() {
-    int port;
+    unsigned int port = 1215;
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     check_errno("Невозможно создать сокет");
     // ......sockaddr_in...........
@@ -33,15 +33,13 @@ void start_server() {
     printf("Listening on %d\n", port);
 
     while(true) {
-        //int client = accept(sockfd, NULL, NULL);
-        accept(sockfd, NULL, NULL);
+        int client = accept(sockfd, NULL, NULL);
         check_errno("Ошибка при соединении с клиентом");
-        int frk = fork();
-        check_errno("Невозможно создать подпоток");
-        if (!frk) {
-            printf("Не");
-        } else {
-            printf("Да");
+        if (!fork()) {
+            check_errno("Невозможно создать подпоток");
+            printf("Клиент приконнектился: %d\n", client);
+            close(client);
+            break;
         }
     }
 }
