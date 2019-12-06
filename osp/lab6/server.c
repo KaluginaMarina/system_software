@@ -51,41 +51,26 @@ unsigned int check_args(int argc, char *argv[]) {
 
 void read_client(int client) {
     int len = 0;
-    char buf[2048];
+    char *buf = (char*)malloc(2048 * sizeof(char));
     int bytes_read;
     char *request = NULL;
     while ((bytes_read = read(client, buf, 2048)) > 0) {
         request = realloc(request, len + bytes_read);
         memcpy(request + len, buf, bytes_read);
         len += bytes_read;
-
-        if (len < 2) continue;
-        if (request[len - 1] == '\n') {
-            if (len == 1) {
-                continue;
-            }
-            if (len == 2) {
-                printf("Не получено ничего");
-                write(client, "Ничего", 6);
-                close(client);
-                return;
-            }
-            if (len > 4 && request[len - 2] == '\n') {
-                len -= 1;
-                char *path_start = request;
-                for (char *path_end = request; path_end < request + len; ++path_end) {
-                    if (*path_end == '\n') {
-                        *path_end = '\0';
-                        print_dir(client, path_start);
-                        path_end += 2;
-                        path_start = path_end;
-                    }
-                }
-                dprintf(client, "\n");
-            }
+        printf("request: \"%s\"\n", request);
+        if (*(request + len - 1) == '\0'){
+            break;
         }
-        printf("%s\n", request);
     }
+
+    printf("kekus\n");
+
+    char *dirs = (char*)malloc(len * sizeof(char));
+    print_dir(client, buf);
+    write(client, dirs, len);
+
+    close(client);
 }
 
 void start_server(unsigned int port) {
@@ -112,7 +97,6 @@ void start_server(unsigned int port) {
         if (!fork()) {
             check_errno("Невозможно создать подпоток");
             printf("Клиент приконнектился: %d\n", client);
-
             read_client(client);
         }
     }
