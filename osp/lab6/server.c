@@ -32,8 +32,7 @@ void print_dir(int fd, const char *dirname) {
         dprintf(fd, "%s\n", ent->d_name);
         printf("%s\n", ent->d_name);
     }
-    dprintf(fd, "\n");
-
+    dprintf(fd, "\n\n");
     closedir(dir);
 }
 
@@ -66,12 +65,13 @@ void read_client(int client) {
         }
     }
 
-    printf("kekus\n");
-
-    char *dirs = (char*)malloc(len * sizeof(char));
-    print_dir(client, buf);
-    write(client, dirs, len);
-
+    char *dirs = strtok(request, "\n");
+    while (dirs != NULL) {
+        print_dir(client, dirs);
+        dirs = strtok(NULL, "\n");
+    }
+    write(client, "\0", 1);
+    free (request);
     close(client);
 }
 

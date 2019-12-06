@@ -45,7 +45,7 @@ void getinfo(int argc, char* argv[]) {
 
     for (int i = 3; i < argc; ++i) {
         write(sockfd, argv[i], strlen(argv[i]));
-    //    write(sockfd, "\n", 1);
+        write(sockfd, "\n", 1);
     }
     write(sockfd, "\0", 1);
 
@@ -63,10 +63,6 @@ void getinfo(int argc, char* argv[]) {
     }
     printf("Response: %s\n", response);
 
-
-//    while (read(sockfd, buf, 2048) > 0) {
-//        printf("%s", buf);
-//    }
     close(sockfd);
 }
 
