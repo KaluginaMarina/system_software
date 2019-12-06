@@ -22,7 +22,7 @@ unsigned int check_args(int argc, char* argv[]) {
     }
     char *p;
     unsigned int port = (int) strtol(argv[optind], &p, 10);
-    if (errno != 0 || port < 0) {
+    if (errno != 0 || port < 0 || *p != '\0') {
         fprintf(stderr, "Указан неверный порт.\n");
         exit(1);
     }

@@ -12,6 +12,12 @@ void check_errno(char *strerr) {
     }
 }
 
+void check_args(int argc, char* argv[]) {
+    if (argc < 4) {
+        fprintf(stderr, "Используйте host port [paths...]\n");
+        exit(1);
+    }
+}
 
 void getinfo(int argc, char* argv[]) {
     struct addrinfo addrinfo;
@@ -21,7 +27,7 @@ void getinfo(int argc, char* argv[]) {
     struct addrinfo *addr;
 
     getaddrinfo(argv[1], argv[2], &addrinfo, &addr);
-    check_errno("Невозможно получить getaddrinfo");
+    check_errno("Используйте host port [paths...]");
 
     int sockfd = 0;
     for (struct addrinfo* a = addr; a != NULL; a = a->ai_next) {
