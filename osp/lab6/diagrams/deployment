@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+
+node "Сервер" as server_node {
+  artifact server <<Executable>> as server_exe
+  
+  artifact "libc" <<OS Component>> as server_libc
+  artifact "POSIX-Compliant OS" <<OS>> as server_os
+  
+  server_exe ..> server_libc
+  server_libc ..> server_os
+ 
+}
+
+node "Клиент" as client_node {
+  artifact client <<Executable>> as client_exe
+ 
+  artifact "libc" <<OS Component>> as client_libc
+  artifact "POSIX-Compliant OS" <<OS>> as client_os
+  
+  client_exe ..> client_libc
+  client_libc ..> client_os
+}
+
+client_node -right-> server_node : TCP/IP
+@enduml
