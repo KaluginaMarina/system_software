@@ -1,0 +1,13 @@
+@startuml
+package Сервер {
+  TCPConnection --> [ClientCommunication]
+  [DirictoryListing] --> [ClientCommunication]
+}
+
+package Клиент {
+  Entrypoint --> [ServerCommunication]
+  Entrypoint --> [ArgumentProcessing]
+  [ServerCommunication] --> [ResponsePrinting]
+  [ServerCommunication] --> TCPConnection
+}
+@enduml
